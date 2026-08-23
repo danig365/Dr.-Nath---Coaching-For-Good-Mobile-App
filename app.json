@@ -14,7 +14,8 @@
         "NSCameraUsageDescription": "Dr. Nath uses your camera for live coaching video sessions.",
         "NSMicrophoneUsageDescription": "Dr. Nath uses your microphone for live coaching sessions.",
         "NSPhotoLibraryUsageDescription": "Dr. Nath needs photo access so you can upload a profile picture and share files with your coach."
-      }
+      },
+      "bitcode": false
     },
     "android": {
       "package": "com.drnath.coaching",
@@ -28,7 +29,11 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
-        "android.permission.INTERNET"
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.WAKE_LOCK",
+        "android.permission.BLUETOOTH"
       ]
     },
     "web": {
@@ -55,9 +60,11 @@
       "typedRoutes": false
     },
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": null
+        "projectId": "0553c928-397c-4cb8-96e2-514aead5b4f9"
       }
-    }
+    },
+    "owner": "danishrehman78677"
   }
 }
