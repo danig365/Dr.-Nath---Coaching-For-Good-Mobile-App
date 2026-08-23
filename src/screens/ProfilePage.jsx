@@ -439,12 +439,21 @@ export default function ProfilePage() {
       )}
 
       <Button
+        variant="ghost"
+        onPress={() => router.push("/contact")}
+        className="mt-4"
+        fullWidth
+      >
+        Contact Dr. Nath
+      </Button>
+
+      <Button
         variant="outline"
         onPress={async () => {
           await logout();
           router.replace("/login");
         }}
-        className="mt-4"
+        className="mt-2"
         fullWidth
       >
         Sign out

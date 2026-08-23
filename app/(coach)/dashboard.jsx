@@ -1,65 +1,91 @@
+import { useCallback, useEffect, useState } from "react";
 import { View, Text } from "react-native";
-import { useRouter } from "expo-router";
 
+import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Badge } from "@/components/ui";
+import { Screen, Card } from "@/components/ui";
+import NextSessionCard from "@/components/home/NextSessionCard";
+import QuickActions from "@/components/home/QuickActions";
+import { isUpcomingSession, sessionStartDate } from "@/lib/sessionTiming";
 
-// Phase 1 coach home — same purpose as the client one: prove the auth stack and
-// give the coach tab bar a landing screen. Phase 3 replaces the body.
-export default function CoachDashboard() {
-  const router = useRouter();
-  const { firstName, user, timezone, approvalStatus, logout } = useAuth();
+// Coach home.
+//
+// Carries the destinations that don't fit the five tab slots — Profile lives
+// here rather than in the tab bar, because a coach reaches client documents
+// constantly and edits their profile rarely.
+const ACTIONS = [
+  { icon: "target", label: "Milestones", href: "/milestones" },
+  { icon: "activity", label: "Habits", href: "/habits" },
+  { icon: "award", label: "My Skills", href: "/(coach)/skills" },
+  { icon: "plus-circle", label: "Add Skill", href: "/add-skill" },
+  { icon: "users", label: "Group Sessions", href: "/group-sessions" },
+  { icon: "user", label: "Profile", href: "/(coach)/profile" },
+];
 
-  const onLogout = async () => {
-    await logout();
-    router.replace("/login");
-  };
+export default function CoachHome() {
+  const { firstName, user, approvalStatus } = useAuth();
+  const [next, setNext] = useState(null);
+  const [todayCount, setTodayCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    try {
+      const res = await api.get("/bookings/");
+      const all = Array.isArray(res.data) ? res.data : (res.data.results ?? []);
+      const upcoming = all
+        .filter(isUpcomingSession)
+        .sort((a, b) => sessionStartDate(a) - sessionStartDate(b));
+      setNext(upcoming[0] || null);
+
+      const today = new Date().toDateString();
+      setTodayCount(
+        upcoming.filter((s) => sessionStartDate(s).toDateString() === today).length
+      );
+    } catch {
+      setNext(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  if (loading) return <Screen loading />;
 
   return (
-    <Screen>
-      <Text className="text-xs font-sans-semibold uppercase tracking-[3px] text-gold-deep">
+    <Screen onRefresh={load} refreshing={false}>
+      <Text className="text-xs font-sans-semibold uppercase tracking-[2px] text-gold-deep">
         Coach
       </Text>
       <Text className="mt-2 font-display text-4xl text-navy">
         {firstName || user?.username || "Hello"}
       </Text>
 
+      {approvalStatus && approvalStatus !== "approved" ? (
+        <Card className="mt-4 border-amber-200 bg-amber-50">
+          <Text className="font-sans-semibold text-sm text-amber-900">
+            Your coach profile is {approvalStatus}.
+          </Text>
+        </Card>
+      ) : null}
+
       <Card className="mt-6">
-        <Text className="font-sans-semibold text-navy">Your session</Text>
-        <View className="mt-3 gap-2">
-          <Row label="Signed in as" value={user?.username} />
-          <Row label="Email" value={user?.email} />
-          <Row label="Timezone" value={timezone || "resolving…"} />
-          <Row label="Approval" value={approvalStatus} />
-        </View>
-        <Badge tone="navy" className="mt-4">
-          {user?.role ?? "coach"}
-        </Badge>
+        <Text className="font-sans text-sm text-slate">
+          <Text className="font-display text-2xl text-navy">{todayCount}</Text>
+          {todayCount === 1 ? " session today" : " sessions today"}
+        </Text>
       </Card>
 
-      {/* Profile isn't a tab for coaches (Workspace takes that slot), so it is
-          reachable from here. */}
-      <Button
-        variant="navy"
-        onPress={() => router.push("/(coach)/profile")}
-        className="mt-6"
-        fullWidth
-      >
-        Edit profile
-      </Button>
+      <NextSessionCard
+        session={next}
+        emptyLabel="No upcoming sessions booked."
+        emptyHref="/(coach)/availability"
+        emptyCta="Open availability"
+      />
 
-      <Button variant="outline" onPress={onLogout} className="mt-3" fullWidth>
-        Sign out
-      </Button>
+      <QuickActions actions={ACTIONS} />
     </Screen>
-  );
-}
-
-function Row({ label, value }) {
-  return (
-    <View className="flex-row justify-between">
-      <Text className="font-sans text-sm text-slate-light">{label}</Text>
-      <Text className="font-sans-medium text-sm text-navy">{value ?? "—"}</Text>
-    </View>
   );
 }

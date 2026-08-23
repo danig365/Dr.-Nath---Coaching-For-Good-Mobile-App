@@ -5,6 +5,14 @@ import { colors } from "@/theme/colors";
 import RequireAuth from "@/components/RequireAuth";
 
 // Client tab bar. Coaches get a different set — see app/(coach)/_layout.jsx.
+//
+// Five slots for roughly ten web destinations, so the overflow lives on Home as
+// quick actions (Milestones, Habits, Group Sessions, Find a Coach) and under the
+// Workspace sub-nav (Agreements, Forms).
+//
+// "Book" gets a slot of its own on purpose: on the web, booking is buried under
+// Coaches > Browse Skills, and a real client emailed the coach because she
+// couldn't find it. It should never be more than one tap away.
 export default function ClientLayout() {
   return (
     <RequireAuth>
@@ -28,23 +36,27 @@ export default function ClientLayout() {
           }}
         />
         <Tabs.Screen
-          name="sessions"
+          name="learning"
           options={{
             title: "Sessions",
-            tabBarIcon: ({ color, size }) => <Feather name="calendar" size={size} color={color} />,
+            tabBarIcon: ({ color, size }) => (
+              <Feather name="calendar" size={size} color={color} />
+            ),
           }}
         />
         <Tabs.Screen
-          name="learning"
+          name="book"
           options={{
-            title: "Learning",
-            tabBarIcon: ({ color, size }) => <Feather name="target" size={size} color={color} />,
+            title: "Book",
+            tabBarIcon: ({ color, size }) => (
+              <Feather name="plus-circle" size={size} color={color} />
+            ),
           }}
         />
         <Tabs.Screen
           name="resources"
           options={{
-            title: "Resources",
+            title: "Workspace",
             tabBarIcon: ({ color, size }) => <Feather name="folder" size={size} color={color} />,
           }}
         />
@@ -57,7 +69,7 @@ export default function ClientLayout() {
         />
 
         {/* Sub-sections of the workspace, reached via WorkspaceTabs from the
-            Resources tab rather than getting tab bar slots of their own. */}
+            Workspace tab rather than getting tab bar slots of their own. */}
         <Tabs.Screen name="agreements" options={{ href: null, title: "Agreements" }} />
         <Tabs.Screen name="forms" options={{ href: null, title: "Forms" }} />
       </Tabs>
