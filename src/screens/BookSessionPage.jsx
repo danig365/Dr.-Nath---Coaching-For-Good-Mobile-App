@@ -605,11 +605,17 @@ export default function BookSessionPage() {
                       <Pressable
                         key={lvl}
                         onPress={() => setFormData((f) => ({ ...f, skillLevel: lvl }))}
-                        className={`flex-1 items-center rounded-xl border px-3 py-3 ${
+                        className={`flex-1 items-center rounded-xl border px-2 py-3 ${
                           active ? "border-gold bg-gold" : "border-gold/30 bg-white"
                         }`}
                       >
+                        {/* Three equal columns leave ~70dp for the label, and
+                            "Intermediate" needs more, so it was breaking
+                            mid-word. Shrink it to fit rather than wrap. */}
                         <Text
+                          numberOfLines={1}
+                          adjustsFontSizeToFit
+                          minimumFontScale={0.8}
                           className={`font-sans-medium text-sm ${
                             active ? "text-navy-deep" : "text-navy"
                           }`}
