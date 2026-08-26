@@ -11,7 +11,7 @@ import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 
-import { api } from "@/api/client";
+import { api, publicApi } from "@/api/client";
 import { Button, Input } from "@/components/ui";
 import { toast } from "@/lib/toast";
 import { useKeyboardHeight } from "@/lib/useKeyboardHeight";
@@ -199,6 +199,20 @@ export default function Register() {
     handleSubmit();
   };
 
+  // After a request whose response never arrived: did the account get created
+  // anyway? true = yes, false = definitely not, null = still can't tell.
+  const registrationLanded = async () => {
+    try {
+      const res = await publicApi.post("/register/check/", {
+        username: form.username.trim(),
+        email: form.email.trim(),
+      });
+      return !!(res.data?.username_taken || res.data?.email_taken);
+    } catch {
+      return null;
+    }
+  };
+
   const handleSubmit = async () => {
     setFormError("");
     setIsLoading(true);
@@ -236,8 +250,27 @@ export default function Register() {
         setFormError(general);
         toast.error(general || "Please fix the highlighted fields.");
       } else {
+        // No `err.response` means the reply never arrived — but the request may
+        // well have reached the server and created the account. Saying it failed
+        // sends the user back to retry, where they hit "username already taken"
+        // and have no idea why. Ask before claiming anything.
+        const landed = await registrationLanded();
+
+        if (landed) {
+          toast.success(
+            form.role === "coach"
+              ? "Registration submitted. Your profile is under review."
+              : "Registered successfully! You can now log in."
+          );
+          router.replace(next ? `/login?next=${encodeURIComponent(next)}` : "/login");
+          return;
+        }
+
         setFormError(
-          "Couldn't create your account. Please check your connection and try again."
+          landed === false
+            ? "Couldn't create your account. Please check your connection and try again."
+            : "We couldn't confirm whether your account was created. Try signing in — " +
+              "if that doesn't work, sign up again."
         );
         toast.error("An unexpected error occurred.");
       }
