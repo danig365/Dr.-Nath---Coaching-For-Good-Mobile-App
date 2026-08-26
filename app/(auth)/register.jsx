@@ -125,6 +125,16 @@ export default function Register() {
     setForm((f) => ({ ...f, [name]: value }));
   };
 
+  // Surrounding whitespace in a password is almost always accidental — a mobile
+  // keyboard adding a space after autocorrect — and it is invisible, so a
+  // trailing one in a single field reads as "the two passwords don't match"
+  // with nothing on screen to explain it. Both fields are compared and sent
+  // trimmed, so the password stored is the one the user can retype.
+  //
+  // Inner spaces are untouched: a passphrase is a legitimate password.
+  const password = form.password.trim();
+  const password2 = form.password2.trim();
+
   // Validate the account step with a specific message per field.
   const validateStep0 = () => {
     const errs = {};
@@ -133,9 +143,9 @@ export default function Register() {
     if (u.length < 3) errs.username = "Username must be at least 3 characters.";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))
       errs.email = "Please enter a valid email address.";
-    if (form.password.length < 8)
+    if (password.length < 8)
       errs.password = "Password must be at least 8 characters.";
-    else if (form.password !== form.password2)
+    else if (password !== password2)
       errs.password2 = "The two passwords don't match.";
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
@@ -197,6 +207,8 @@ export default function Register() {
         ...form,
         username: form.username.trim(),
         email: form.email.trim(),
+        password,
+        password2,
       });
 
       if (form.role === "coach") {
@@ -235,11 +247,7 @@ export default function Register() {
   };
 
   const isStep0Valid =
-    form.username &&
-    form.email &&
-    form.password &&
-    form.password2 &&
-    form.password === form.password2;
+    form.username && form.email && password && password2 && password === password2;
   const isStep1Valid = !!form.role;
 
   const heading =
@@ -334,7 +342,7 @@ export default function Register() {
                     />
                   </Pressable>
                 </View>
-                <PasswordStrength password={form.password} />
+                <PasswordStrength password={password} />
 
                 <View className="relative">
                   <Input
@@ -346,7 +354,7 @@ export default function Register() {
                     autoCapitalize="none"
                     error={
                       fieldErrors.password2 ||
-                      (form.password2 && form.password !== form.password2
+                      (password2 && password !== password2
                         ? "The two passwords don't match."
                         : undefined)
                     }
