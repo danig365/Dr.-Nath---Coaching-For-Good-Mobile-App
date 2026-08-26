@@ -46,7 +46,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-navy-deep">
+    <SafeAreaView edges={["bottom"]} className="flex-1 bg-navy-deep">
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
