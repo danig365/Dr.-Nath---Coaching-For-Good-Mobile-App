@@ -7,6 +7,8 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { API_HOST } from "@/api/config";
 import { publicApi } from "@/api/client";
+import { useAuth } from "@/context/AuthContext";
+import { homeHrefFor } from "@/lib/appMenu";
 import { Button } from "@/components/ui";
 import GuestHeader from "@/components/GuestHeader";
 import StatsTicker from "@/components/landing/StatsTicker";
@@ -102,6 +104,7 @@ const FOOTER = [
   },
   {
     title: "Account",
+    // Replaced at render for a signed-in visitor — see accountLinks below.
     links: [
       { label: "Sign Up", to: "/register" },
       { label: "Log In", to: "/login" },
@@ -182,6 +185,14 @@ export default function Landing() {
   const router = useRouter();
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const { isAuthenticated, role } = useAuth();
+
+  // A signed-in visitor can reach this page (the logo, or Android back after
+  // login), and every call to action on it assumed they were a stranger:
+  // "Sign Up", "Log In", "Get Started" all led to the sign-up form. Signed in,
+  // they all point at the account instead.
+  const appHref = homeHrefFor(role);
+  const joinHref = isAuthenticated ? appHref : "/register";
   // The guest navbar floats over the hero (GuestHeader is absolutely
   // positioned): safe-area inset + py-2 + a 72pt logo.
   const headerHeight = insets.top + 88;
@@ -357,7 +368,7 @@ export default function Landing() {
                 </View>
                 <Text className="mb-2 font-display text-xl text-navy">{o.title}</Text>
                 <Text className="mb-5 font-sans text-base leading-6 text-slate">{o.desc}</Text>
-                <Button variant="gold" size="sm" onPress={() => router.push("/register")}>
+                <Button variant="gold" size="sm" onPress={() => router.push(joinHref)}>
                   Book a Session →
                 </Button>
               </View>
@@ -399,8 +410,8 @@ export default function Landing() {
           <Text className="mb-10 text-center font-sans text-base text-slate">
             Join other professionals.
           </Text>
-          <Button variant="gold" onPress={() => router.push("/register")} fullWidth>
-            Get Started →
+          <Button variant="gold" onPress={() => router.push(joinHref)} fullWidth>
+            {isAuthenticated ? "Go to my account →" : "Get Started →"}
           </Button>
         </View>
 
@@ -411,10 +422,18 @@ export default function Landing() {
               <View key={col.title}>
                 <Text className="mb-4 font-display text-xl text-gold">{col.title}</Text>
                 <View className="gap-2">
-                  {col.links.map((l) => (
+                  {(col.title === "Account" && isAuthenticated
+                    ? [{ label: "Go to my account", to: appHref }]
+                    : col.links
+                  ).map((l) => (
                     <Pressable
                       key={l.label}
-                      onPress={() => (l.jump ? jump(l.jump) : router.push(l.to))}
+                      onPress={() =>
+                        l.jump
+                          ? jump(l.jump)
+                          : // Any sign-up link is meaningless once signed in.
+                            router.push(l.to === "/register" ? joinHref : l.to)
+                      }
                     >
                       <Text className="font-sans text-sm text-cream/50">{l.label}</Text>
                     </Pressable>

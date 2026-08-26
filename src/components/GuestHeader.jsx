@@ -6,6 +6,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 
 import { API_HOST } from "@/api/config";
+import { useAuth } from "@/context/AuthContext";
+import { homeHrefFor } from "@/lib/appMenu";
 import { colors } from "@/theme/colors";
 
 // Guest navbar, mirroring guestLinks in frontend/src/components/Navbar.jsx:
@@ -24,6 +26,7 @@ import { colors } from "@/theme/colors";
 // runs edge to edge beneath it); without it the bar sits in normal flow.
 export default function GuestHeader({ onJump, floating = false }) {
   const router = useRouter();
+  const { isAuthenticated, role } = useAuth();
   const [open, setOpen] = useState(false);
 
   const goSection = (key) =>
@@ -101,11 +104,22 @@ export default function GuestHeader({ onJump, floating = false }) {
                 </Pressable>
               ))}
 
+              {/* Web swaps guestLinks for the signed-in nav on this same page
+                  (flatLinks in Navbar.jsx). Offering "Login" to someone already
+                  logged in is the mobile version of not doing that. */}
               <Pressable
-                onPress={() => go(() => router.push("/login"))}
+                onPress={() =>
+                  go(() =>
+                    isAuthenticated
+                      ? router.replace(homeHrefFor(role))
+                      : router.push("/login")
+                  )
+                }
                 className="mt-8 items-center rounded-full border border-cream/40 py-4"
               >
-                <Text className="font-sans-bold text-base text-cream">Login</Text>
+                <Text className="font-sans-bold text-base text-cream">
+                  {isAuthenticated ? "Go to my account" : "Login"}
+                </Text>
               </Pressable>
 
               <Pressable

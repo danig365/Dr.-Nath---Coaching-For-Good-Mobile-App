@@ -30,3 +30,10 @@ export function useAppMenuVisible() {
 
   return isAuthenticated && !HIDE_ON.some((p) => pathname.startsWith(p));
 }
+
+// Where a signed-in user belongs when the landing page would otherwise offer
+// them "Sign up" or "Log in". Mirrors HomeGate in frontend/src/App.jsx.
+export function homeHrefFor(role) {
+  const isCoach = role === "coach" || role === "mentor";
+  return isCoach ? "/(coach)/skills" : "/(client)/book";
+}
