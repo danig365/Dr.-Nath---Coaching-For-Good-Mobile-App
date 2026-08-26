@@ -340,7 +340,10 @@ export default function Landing() {
               source={{ uri: `${API_HOST}/dr-nath.jpg` }}
               style={{ flex: 1 }}
               contentFit="cover"
-              contentPosition="70% center"
+              // Source is 1656x932 with her figure spanning roughly x=560-1450.
+              // A 4:5 crop at 70% lands on [637, 1383]: a band of empty wall on
+              // the left, her arm clipped on the right. 78% centres her.
+              contentPosition="78% center"
               transition={300}
             />
           </View>
