@@ -24,41 +24,6 @@ import { colors } from "@/theme/colors";
 // The web file also defines an FAQ accordion, but it is never rendered in the
 // JSX — dead code — so it is not ported here either.
 
-// Stepped equivalent of the web hero's legibility gradient
-// (linear-gradient(to top, ...) in frontend/src/pages/Home.jsx): opaque at the
-// bottom where the copy sits, nearly clear at the top where her face is.
-const HERO_STOPS = [
-  [0.0, 0.92],
-  [0.08, 0.92],
-  [0.4, 0.55],
-  [0.7, 0.2],
-  [1.0, 0.1],
-];
-
-const HERO_BAND_COUNT = 16;
-
-const HERO_WASH = Array.from({ length: HERO_BAND_COUNT }, (_, i) => {
-  const from = i / HERO_BAND_COUNT;
-  const mid = from + 0.5 / HERO_BAND_COUNT;
-
-  let alpha = HERO_STOPS[HERO_STOPS.length - 1][1];
-  for (let k = 1; k < HERO_STOPS.length; k += 1) {
-    const [p0, a0] = HERO_STOPS[k - 1];
-    const [p1, a1] = HERO_STOPS[k];
-    if (mid >= p0 && mid <= p1) {
-      alpha = p1 === p0 ? a1 : a0 + ((a1 - a0) * (mid - p0)) / (p1 - p0);
-      break;
-    }
-  }
-
-  return {
-    bottom: `${from * 100}%`,
-    // A hair over one band tall, so rounding can't leave hairlines between them.
-    height: `${100 / HERO_BAND_COUNT + 0.5}%`,
-    alpha: alpha.toFixed(3),
-  };
-});
-
 const HERO_OFFERINGS = [
   "Health and Wellness Coaching",
   "Executive and Leadership Coaching",
@@ -275,25 +240,24 @@ export default function Landing() {
             contentPosition="top center"
             transition={300}
           />
-          {/* Legibility wash. Web uses a CSS gradient here — 0.92 at the
-              bottom easing to 0.10 at the top — so the copy stays readable
-              without dimming her face. expo-linear-gradient is a native module
-              and would force a new dev build, so this steps the same curve
-              through stacked bands instead. The flat 35% sheet this replaces
-              covered the whole photo, her included. */}
-          {HERO_WASH.map((band, i) => (
-            <View
-              key={i}
-              style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                bottom: band.bottom,
-                height: band.height,
-                backgroundColor: `rgba(17,28,49,${band.alpha})`,
-              }}
-            />
-          ))}
+          {/* Legibility wash: opaque where the copy sits, near-clear over her
+              face — the same stops as the web hero's CSS gradient.
+
+              A real gradient, via React Native's own background-image support
+              (0.86). Approximating it with stacked translucent bands banded
+              visibly: wherever two overlapped, their alpha compounded into a
+              dark line across the photo. */}
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              experimental_backgroundImage:
+                "linear-gradient(to top, rgba(17,28,49,0.92) 8%, rgba(17,28,49,0.55) 40%, rgba(17,28,49,0.20) 70%, rgba(17,28,49,0.10) 100%)",
+            }}
+          />
 
           <SafeAreaView edges={["top"]} className="flex-1 justify-end px-7 pb-12 pt-24">
             <Text className="mb-5 text-xs font-sans-semibold uppercase tracking-[3px] text-gold">
