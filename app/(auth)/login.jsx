@@ -15,6 +15,7 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/lib/toast";
+import { useKeyboardHeight } from "@/lib/useKeyboardHeight";
 
 // Mobile port of frontend/src/pages/Login.jsx. Same endpoint, same field
 // semantics (the "username" field accepts a username OR an email), and the same
@@ -35,6 +36,7 @@ const FIELD_BORDER_FOCUS = "#C8A951";
 
 export default function Login() {
   const router = useRouter();
+  const keyboardHeight = useKeyboardHeight();
   const { login } = useAuth();
   // Deep links (e.g. an emailed join link via app/join/[token].jsx) pass a
   // destination through ?next= so the user lands where they were headed.
@@ -93,7 +95,9 @@ export default function Login() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
-          contentContainerClassName="flex-grow justify-center px-5 py-8"
+          contentContainerClassName={`flex-grow px-5 py-8 ${
+            keyboardHeight ? "justify-start" : "justify-center"
+          }`}
           keyboardShouldPersistTaps="handled"
         >
           {/* Card */}
@@ -278,6 +282,9 @@ export default function Login() {
               </Link>
             </View>
           </View>
+
+          {/* Lets the fields below the focused one scroll clear of the keyboard. */}
+          <View style={{ height: keyboardHeight }} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

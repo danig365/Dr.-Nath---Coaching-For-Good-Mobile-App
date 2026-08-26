@@ -14,6 +14,7 @@ import Feather from "@expo/vector-icons/Feather";
 import { publicApi } from "@/api/client";
 import { Button, Input } from "@/components/ui";
 import { toast } from "@/lib/toast";
+import { useKeyboardHeight } from "@/lib/useKeyboardHeight";
 import { colors } from "@/theme/colors";
 
 // Port of frontend/src/pages/ResetPassword.jsx. Reached from the emailed link,
@@ -21,6 +22,7 @@ import { colors } from "@/theme/colors";
 export default function ResetPassword() {
   const { uid, token } = useLocalSearchParams();
   const router = useRouter();
+  const keyboardHeight = useKeyboardHeight();
 
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
@@ -63,7 +65,9 @@ export default function ResetPassword() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
-          contentContainerClassName="flex-grow justify-center px-6 py-10"
+          contentContainerClassName={`flex-grow px-6 py-10 ${
+            keyboardHeight ? "justify-start" : "justify-center"
+          }`}
           keyboardShouldPersistTaps="handled"
         >
           <Text className="mb-1 font-display text-2xl text-cream">
@@ -129,6 +133,9 @@ export default function ResetPassword() {
               <Text className="font-sans-semibold text-sm text-gold">Back to sign in</Text>
             </Pressable>
           </Link>
+
+          {/* Lets the fields below the focused one scroll clear of the keyboard. */}
+          <View style={{ height: keyboardHeight }} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

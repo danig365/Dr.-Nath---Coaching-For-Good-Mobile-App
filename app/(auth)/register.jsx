@@ -14,6 +14,7 @@ import Feather from "@expo/vector-icons/Feather";
 import { api } from "@/api/client";
 import { Button, Input } from "@/components/ui";
 import { toast } from "@/lib/toast";
+import { useKeyboardHeight } from "@/lib/useKeyboardHeight";
 import { colors } from "@/theme/colors";
 
 // Port of frontend/src/pages/Register.jsx — the same three-step wizard.
@@ -84,6 +85,7 @@ function StepIndicator({ step }) {
 
 export default function Register() {
   const router = useRouter();
+  const keyboardHeight = useKeyboardHeight();
   const { next } = useLocalSearchParams();
 
   const [step, setStep] = useState(0);
@@ -527,6 +529,9 @@ export default function Register() {
               </Pressable>
             </Link>
           </View>
+
+          {/* Lets the fields below the focused one scroll clear of the keyboard. */}
+          <View style={{ height: keyboardHeight }} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

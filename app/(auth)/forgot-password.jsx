@@ -14,10 +14,12 @@ import Feather from "@expo/vector-icons/Feather";
 import { publicApi } from "@/api/client";
 import { Button, Input } from "@/components/ui";
 import { colors } from "@/theme/colors";
+import { useKeyboardHeight } from "@/lib/useKeyboardHeight";
 
 // Port of frontend/src/pages/ForgotPassword.jsx — same endpoint, same copy, same
 // 429 handling (the backend throttles this path).
 export default function ForgotPassword() {
+  const keyboardHeight = useKeyboardHeight();
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
@@ -52,7 +54,9 @@ export default function ForgotPassword() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
-          contentContainerClassName="flex-grow justify-center px-6 py-10"
+          contentContainerClassName={`flex-grow px-6 py-10 ${
+            keyboardHeight ? "justify-start" : "justify-center"
+          }`}
           keyboardShouldPersistTaps="handled"
         >
           {sent ? (
@@ -105,6 +109,9 @@ export default function ForgotPassword() {
               <BackToSignIn className="mt-5" />
             </>
           )}
+
+          {/* Lets the fields below the focused one scroll clear of the keyboard. */}
+          <View style={{ height: keyboardHeight }} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
