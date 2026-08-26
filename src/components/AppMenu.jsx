@@ -69,6 +69,7 @@ const COACH_GROUPS = [
       // `!isAuthenticated`), so it is not in a signed-in menu here either. The
       // page still exists and the landing header still links to it.
       { icon: "user", label: "My Profile", href: "/(coach)/profile" },
+      { icon: "log-out", label: "Sign out", action: "logout", danger: true },
     ],
   },
 ];
@@ -106,19 +107,21 @@ const CLIENT_GROUPS = [
     label: "Account",
     items: [
       { icon: "user", label: "My Profile", href: "/(client)/profile" },
+      { icon: "log-out", label: "Sign out", action: "logout", danger: true },
     ],
   },
 ];
 
 // Groups render as `/(coach)/x` or `/(client)/x` but the router reports the
 // pathname without the group segment.
-const toPathname = (href) => href.replace("/(coach)", "").replace("/(client)", "");
+const toPathname = (href) =>
+  (href ?? "").replace("/(coach)", "").replace("/(client)", "");
 
 export default function AppMenu() {
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
-  const { firstName, user, role } = useAuth();
+  const { firstName, user, role, logout } = useAuth();
   const visible = useAppMenuVisible();
 
   const isCoach = role === "coach" || role === "mentor";
@@ -177,6 +180,14 @@ export default function AppMenu() {
   // pops back to it instead of stacking a second copy, which is what a tab bar
   // would have done.
   const go = (href) => close(() => router.navigate(href));
+
+  // Same destination as the Sign out button on the Profile screen — two ways
+  // out of the app should not land somewhere different.
+  const signOut = () =>
+    close(async () => {
+      await logout();
+      router.replace("/login");
+    });
 
   if (!visible) return null;
 
@@ -238,19 +249,27 @@ export default function AppMenu() {
                   ) : null}
 
                   {group.items.map((item) => {
-                    const active = pathname === toPathname(item.href);
+                    const active = !!item.href && pathname === toPathname(item.href);
                     return (
                       <Pressable
-                        key={item.href}
-                        onPress={() => go(item.href)}
+                        key={item.href ?? item.action}
+                        onPress={item.action === "logout" ? signOut : () => go(item.href)}
                         accessibilityRole="button"
                         accessibilityState={{ selected: active }}
                         className={`flex-row items-center gap-3 px-5 py-2.5 active:bg-white/10 ${
                           active ? "border-l-[3px] border-gold bg-gold/15 pl-[17px]" : ""
                         }`}
                       >
-                        <Feather name={item.icon} size={17} color={colors.gold} />
-                        <Text className="flex-1 font-sans text-[15px] text-cream">
+                        <Feather
+                          name={item.icon}
+                          size={17}
+                          color={item.danger ? "#E8938A" : colors.gold}
+                        />
+                        <Text
+                          className={`flex-1 font-sans text-[15px] ${
+                            item.danger ? "text-[#E8938A]" : "text-cream"
+                          }`}
+                        >
                           {item.label}
                         </Text>
 
