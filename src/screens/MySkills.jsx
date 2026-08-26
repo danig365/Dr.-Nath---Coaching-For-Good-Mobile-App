@@ -226,10 +226,6 @@ export default function MySkills() {
 
   return (
     <Screen onRefresh={fetchSkills} refreshing={false}>
-      <View className="mb-8">
-        <Text className="font-display text-3xl text-navy">My Skills</Text>
-      </View>
-
       <Button
         variant="gold"
         onPress={() => router.push("/add-skill")}

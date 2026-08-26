@@ -169,14 +169,6 @@ export default function SkillForm({ mode = "add" }) {
 
   return (
     <Screen>
-      <Pressable
-        onPress={() => router.replace("/(coach)/skills")}
-        className="mb-6 flex-row items-center gap-2"
-      >
-        <Feather name="arrow-left" size={14} color={colors.goldDeep} />
-        <Text className="font-sans-medium text-sm text-gold-deep">Back to My Skills</Text>
-      </Pressable>
-
       <Card className="overflow-hidden p-0">
         {/* Card Header */}
         <View className="bg-navy px-6 pb-6 pt-8">
@@ -199,7 +191,7 @@ export default function SkillForm({ mode = "add" }) {
             <Input
               value={form.name}
               onChangeText={(v) => set("name", v)}
-              placeholder="e.g. Executive Communication, Advanced React"
+              placeholder="e.g. Executive Communication"
               className="mb-0"
             />
           </View>

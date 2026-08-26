@@ -136,9 +136,6 @@ export default function CoachDirectory() {
 
   return (
     <Screen>
-      <Text className="mb-2 font-display text-3xl text-navy">
-        Find Your <Text className="text-gold-deep">Coach</Text>
-      </Text>
       <Text className="mb-8 font-sans text-base text-slate">
         Browse our community of verified coaches and find the right guide for your journey.
       </Text>

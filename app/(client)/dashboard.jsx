@@ -5,23 +5,12 @@ import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
 import { Screen } from "@/components/ui";
 import NextSessionCard from "@/components/home/NextSessionCard";
-import QuickActions from "@/components/home/QuickActions";
 import { isUpcomingSession, sessionStartDate } from "@/lib/sessionTiming";
 
-// Client home.
-//
-// The web has no equivalent page — clients land straight on My Learning. On
-// mobile the tab bar only holds five destinations, so this screen carries the
-// overflow (Milestones, Habits, Group Sessions, Find a Coach) that would
-// otherwise be unreachable.
-const ACTIONS = [
-  { icon: "target", label: "Milestones", href: "/milestones" },
-  { icon: "activity", label: "Habits", href: "/habits" },
-  { icon: "users", label: "Group Sessions", href: "/group-sessions" },
-  { icon: "search", label: "Find a Coach", href: "/match" },
-  { icon: "user-check", label: "Browse Coaches", href: "/coaches" },
-  { icon: "mail", label: "Contact", href: "/contact" },
-];
+// Client home — a dashboard, not a menu. Every page now lives in AppMenu,
+// so this screen only answers "where am I up to?". The website has no
+// equivalent: it sends a client straight to the skills list, which is where
+// the app lands too, leaving this one menu tap away.
 
 export default function ClientHome() {
   const { firstName, user } = useAuth();
@@ -66,7 +55,6 @@ export default function ClientHome() {
         emptyCta="Book a session"
       />
 
-      <QuickActions actions={ACTIONS} />
     </Screen>
   );
 }

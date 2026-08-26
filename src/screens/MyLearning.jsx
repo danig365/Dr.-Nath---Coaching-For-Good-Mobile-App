@@ -607,8 +607,6 @@ export default function MyLearning() {
 
   return (
     <Screen onRefresh={fetchSessions} refreshing={false}>
-      <Text className="mb-6 font-display text-3xl text-navy">My Learning Journey</Text>
-
       {/* Google Calendar connect (auto-add sessions) */}
       <GoogleCalendarCard />
 

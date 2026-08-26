@@ -31,7 +31,8 @@ const SUGGESTIONS = [
 ];
 
 // Don't overlap the video-call UI.
-const isHiddenPath = (path) => /\/session\/|\/group-session\/|\/call$/.test(path);
+const isHiddenPath = (path) =>
+  /\/session\/|\/group-session\/|\/call$/.test(path);
 
 // Render a reply as plain text, but turn any stray **bold** the model emits into
 // real bold instead of showing the literal asterisks. Also strips leftover
@@ -48,7 +49,7 @@ function RichText({ text, className }) {
           </Text>
         ) : (
           <Text key={i}>{part}</Text>
-        )
+        ),
       )}
     </Text>
   );
@@ -82,7 +83,10 @@ export default function AssistantWidget() {
       // Send only user/assistant turns (drop the local greeting) to the API.
       const history = next.filter((m, i) => !(i === 0 && m === GREETING));
       const res = await api.post("/assistant/chat/", { messages: history });
-      setMessages((m) => [...m, { role: "assistant", content: res.data.reply }]);
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: res.data.reply },
+      ]);
     } catch (err) {
       const msg =
         err.response?.status === 429
@@ -110,121 +114,148 @@ export default function AssistantWidget() {
       <Modal
         visible={open}
         transparent
-        animationType="slide"
+        animationType="fade"
         onRequestClose={() => setOpen(false)}
+        statusBarTranslucent
       >
         <KeyboardAvoidingView
-          className="flex-1 justify-end"
+          className="flex-1"
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
-          <Pressable className="flex-1" onPress={() => setOpen(false)} />
+          <Pressable
+            className="absolute inset-0 bg-navy-deep/60"
+            onPress={() => setOpen(false)}
+            accessibilityLabel="Close assistant"
+          />
 
+          {/* A floating panel rather than a full-bleed sheet: on web this is a
+              ~380px card in the corner, and edge-to-edge here made a help widget
+              look like the app's main screen. */}
           <View
-            className="overflow-hidden rounded-t-2xl border border-gold/30 bg-cream"
-            style={{ height: "72%" }}
+            pointerEvents="box-none"
+            className="flex-1 items-center justify-end px-4"
+            style={{
+              paddingBottom: insets.bottom + 16,
+              paddingTop: insets.top + 32,
+            }}
           >
-            {/* Header */}
-            <View className="flex-row items-center gap-3 bg-navy px-4 py-3">
-              <View className="h-9 w-9 items-center justify-center rounded-full bg-gold/20">
-                <Feather name="message-circle" size={18} color={colors.gold} />
-              </View>
-              <View className="min-w-0 flex-1">
-                <Text className="font-sans-bold text-sm text-cream">
-                  Dr. Nath Assistant
-                </Text>
-                <Text className="text-[11px] text-slate-light">
-                  Here to help you get started
-                </Text>
-              </View>
-              <Pressable onPress={() => setOpen(false)} hitSlop={8}>
-                <Feather name="x" size={20} color={colors.slateLight} />
-              </Pressable>
-            </View>
-
-            {/* Messages */}
-            <ScrollView
-              ref={scrollRef}
-              className="flex-1"
-              contentContainerClassName="px-4 py-4 gap-3"
-              onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
+            {/* A definite height, not just maxHeight: the messages list below is
+                `flex-1`, and inside an auto-height parent it has nothing to fill
+                and collapses to nothing. */}
+            <View
+              className="w-full overflow-hidden rounded-2xl border border-gold/30 bg-cream"
+              style={{ maxWidth: 420, height: "78%" }}
             >
-              {messages.map((m, i) => {
-                const mine = m.role === "user";
-                return (
-                  <View
-                    key={i}
-                    className={`flex-row ${mine ? "justify-end" : "justify-start"}`}
-                  >
+              {/* Header */}
+              <View className="flex-row items-center gap-3 bg-navy px-4 py-3">
+                <View className="h-9 w-9 items-center justify-center rounded-full bg-gold/20">
+                  <Feather
+                    name="message-circle"
+                    size={18}
+                    color={colors.gold}
+                  />
+                </View>
+                <View className="min-w-0 flex-1">
+                  <Text className="font-sans-bold text-sm text-cream">
+                    Dr. Nath Assistant
+                  </Text>
+                  <Text className="text-[11px] text-slate-light">
+                    Here to help you get started
+                  </Text>
+                </View>
+                <Pressable onPress={() => setOpen(false)} hitSlop={8}>
+                  <Feather name="x" size={20} color={colors.slateLight} />
+                </Pressable>
+              </View>
+
+              {/* Messages */}
+              <ScrollView
+                ref={scrollRef}
+                className="flex-1"
+                contentContainerClassName="px-4 py-4 gap-3"
+                onContentSizeChange={() =>
+                  scrollRef.current?.scrollToEnd({ animated: true })
+                }
+              >
+                {messages.map((m, i) => {
+                  const mine = m.role === "user";
+                  return (
                     <View
-                      className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 ${
-                        mine
-                          ? "rounded-br-sm bg-gold"
-                          : "rounded-bl-sm border border-gold/20 bg-white"
-                      }`}
+                      key={i}
+                      className={`flex-row ${mine ? "justify-end" : "justify-start"}`}
                     >
-                      {mine ? (
-                        <Text className="font-sans text-sm leading-6 text-navy-deep">
-                          {m.content}
+                      <View
+                        className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 ${
+                          mine
+                            ? "rounded-br-sm bg-gold"
+                            : "rounded-bl-sm border border-gold/20 bg-white"
+                        }`}
+                      >
+                        {mine ? (
+                          <Text className="font-sans text-sm leading-6 text-navy-deep">
+                            {m.content}
+                          </Text>
+                        ) : (
+                          <RichText
+                            text={m.content}
+                            className="font-sans text-sm leading-6 text-navy"
+                          />
+                        )}
+                      </View>
+                    </View>
+                  );
+                })}
+
+                {/* Suggestions (only before the first user turn) */}
+                {messages.length === 1 && !loading ? (
+                  <View className="flex-row flex-wrap gap-2 pt-1">
+                    {SUGGESTIONS.map((s) => (
+                      <Pressable
+                        key={s}
+                        onPress={() => send(s)}
+                        className="rounded-full border border-gold bg-white px-3 py-1.5"
+                      >
+                        <Text className="font-sans text-xs text-gold-deep">
+                          {s}
                         </Text>
-                      ) : (
-                        <RichText
-                          text={m.content}
-                          className="font-sans text-sm leading-6 text-navy"
-                        />
-                      )}
+                      </Pressable>
+                    ))}
+                  </View>
+                ) : null}
+
+                {loading ? (
+                  <View className="flex-row justify-start">
+                    <View className="rounded-2xl border border-gold/20 bg-white px-4 py-3">
+                      <Text className="font-sans text-sm text-slate-light">
+                        …
+                      </Text>
                     </View>
                   </View>
-                );
-              })}
+                ) : null}
+              </ScrollView>
 
-              {/* Suggestions (only before the first user turn) */}
-              {messages.length === 1 && !loading ? (
-                <View className="flex-row flex-wrap gap-2 pt-1">
-                  {SUGGESTIONS.map((s) => (
-                    <Pressable
-                      key={s}
-                      onPress={() => send(s)}
-                      className="rounded-full border border-gold bg-white px-3 py-1.5"
-                    >
-                      <Text className="font-sans text-xs text-gold-deep">{s}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              ) : null}
-
-              {loading ? (
-                <View className="flex-row justify-start">
-                  <View className="rounded-2xl border border-gold/20 bg-white px-4 py-3">
-                    <Text className="font-sans text-sm text-slate-light">…</Text>
-                  </View>
-                </View>
-              ) : null}
-            </ScrollView>
-
-            {/* Input */}
-            <View
-              className="flex-row items-center gap-2 border-t border-gold/20 bg-white px-3 py-3"
-              style={{ paddingBottom: insets.bottom + 12 }}
-            >
-              <TextInput
-                value={input}
-                onChangeText={setInput}
-                placeholder="Type your message…"
-                placeholderTextColor={colors.slateLight}
-                maxLength={2000}
-                onSubmitEditing={() => send()}
-                returnKeyType="send"
-                className="flex-1 rounded-full border border-gold/30 bg-cream px-4 py-2.5 font-sans text-sm text-navy"
-              />
-              <Pressable
-                onPress={() => send()}
-                disabled={!input.trim() || loading}
-                className={`h-10 w-10 items-center justify-center rounded-full bg-gold ${
-                  !input.trim() || loading ? "opacity-40" : ""
-                }`}
-              >
-                <Feather name="send" size={16} color={colors.navyDeep} />
-              </Pressable>
+              {/* Input */}
+              <View className="flex-row items-center gap-2 border-t border-gold/20 bg-white px-3 py-3">
+                <TextInput
+                  value={input}
+                  onChangeText={setInput}
+                  placeholder="Type your message…"
+                  placeholderTextColor={colors.slateLight}
+                  maxLength={2000}
+                  onSubmitEditing={() => send()}
+                  returnKeyType="send"
+                  className="flex-1 rounded-full border border-gold/30 bg-cream px-4 py-2.5 font-sans text-sm text-navy"
+                />
+                <Pressable
+                  onPress={() => send()}
+                  disabled={!input.trim() || loading}
+                  className={`h-10 w-10 items-center justify-center rounded-full bg-gold ${
+                    !input.trim() || loading ? "opacity-40" : ""
+                  }`}
+                >
+                  <Feather name="send" size={16} color={colors.navyDeep} />
+                </Pressable>
+              </View>
             </View>
           </View>
         </KeyboardAvoidingView>

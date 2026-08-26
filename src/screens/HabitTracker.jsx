@@ -4,7 +4,7 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input } from "@/components/ui";
+import { Screen, Card, Button, Input, Select } from "@/components/ui";
 import { toast } from "@/lib/toast";
 import { confirm } from "@/lib/confirm";
 import { colors } from "@/theme/colors";
@@ -576,9 +576,6 @@ export default function HabitTracker() {
         <Text className="mb-1 text-xs font-sans-semibold uppercase tracking-[2px] text-gold-deep">
           Accountability
         </Text>
-        <Text className="font-display text-3xl text-navy">
-          {coach ? "Habit Tracker" : "Daily Habits"}
-        </Text>
         <Text className="mt-1 font-sans text-sm text-slate">
           {coach
             ? "Assign daily habits and track each client's consistency."
@@ -611,33 +608,17 @@ export default function HabitTracker() {
             </Button>
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="gap-2 pb-1"
+          <Select
+            label="Filter by client"
+            value={clientId}
+            onChange={onClientChange}
+            options={[
+              { label: "All clients", value: "" },
+              ...clients.map((c) => ({ label: c.username, value: String(c.id) })),
+            ]}
+            searchable={clients.length > 8}
             className="mb-6"
-          >
-            {[{ id: "", username: "All clients" }, ...clients].map((c) => {
-              const active = String(clientId) === String(c.id);
-              return (
-                <Pressable
-                  key={String(c.id)}
-                  onPress={() => onClientChange(String(c.id))}
-                  className={`rounded-full px-4 py-2 ${
-                    active ? "bg-gold" : "border border-gold/30 bg-white"
-                  }`}
-                >
-                  <Text
-                    className={`font-sans-medium text-sm ${
-                      active ? "text-navy-deep" : "text-slate"
-                    }`}
-                  >
-                    {c.username}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+          />
         </>
       ) : null}
 

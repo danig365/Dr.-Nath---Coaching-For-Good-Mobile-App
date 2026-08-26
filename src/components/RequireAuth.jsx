@@ -24,8 +24,8 @@ export default function RequireAuth({ children, coachOnly = false }) {
   if (!profileComplete) return <Redirect href="/complete-profile" />;
 
   const isCoach = role === "coach" || role === "mentor";
-  if (coachOnly && !isCoach) return <Redirect href="/(client)/dashboard" />;
-  if (!coachOnly && isCoach) return <Redirect href="/(coach)/dashboard" />;
+  if (coachOnly && !isCoach) return <Redirect href="/(client)/book" />;
+  if (!coachOnly && isCoach) return <Redirect href="/(coach)/skills" />;
 
   return children;
 }

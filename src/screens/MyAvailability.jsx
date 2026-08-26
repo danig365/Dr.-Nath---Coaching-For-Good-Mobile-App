@@ -7,7 +7,7 @@ import * as Clipboard from "expo-clipboard";
 import { api } from "@/api/client";
 import { API_HOST } from "@/api/config";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input } from "@/components/ui";
+import { Screen, Card, Button, Input, Select } from "@/components/ui";
 import { DateFilter, TimeField, DateTimeField } from "@/components/sessionUi";
 import GoogleCalendarCard from "@/components/GoogleCalendarCard";
 import SentInvitesPanel from "@/components/SentInvitesPanel";
@@ -109,71 +109,81 @@ function Chip({ label, active, onPress, disabled }) {
   );
 }
 
+// Compact numeric field, styled to match Select and TimeField so a card
+// mixing all three reads as one row of controls.
+function NumField({ label, value, onChange, className = "" }) {
+  return (
+    <View className={className}>
+      <Text className="mb-1.5 text-[10px] font-sans-semibold uppercase tracking-wider text-slate">
+        {label}
+      </Text>
+      <TextInput
+        value={String(value)}
+        onChangeText={(v) => onChange(Number(v) || 0)}
+        keyboardType="numeric"
+        className="rounded-lg border border-navy/20 bg-cream px-3 py-2 font-sans text-sm text-navy"
+      />
+    </View>
+  );
+}
+
 // ─── Weekly rule row ────────────────────────────────────────────────────────
+// Laid out like the web page (frontend/src/pages/MyAvailability.jsx): two rows
+// of compact fields, then the actions. The previous version gave Day and Slot a
+// chip per option, which cost three full-width rows per rule and pushed the
+// times and Save button below the fold.
 function RuleRow({ rule, onChange, onSave, onDelete, saving }) {
   return (
     <Card>
-      <Text className="mb-1.5 text-[10px] font-sans-semibold uppercase tracking-wider text-slate">
-        Day
-      </Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerClassName="gap-2 pb-1"
-        className="mb-3"
-      >
-        {DAYS.map((d) => (
-          <Chip
-            key={d}
-            label={d.slice(0, 3)}
-            active={rule.day_of_week === d}
-            onPress={() => onChange({ day_of_week: d })}
-          />
-        ))}
-      </ScrollView>
-
-      <View className="mb-3 flex-row gap-3">
+      <View className="flex-row gap-3">
+        <Select
+          label="Day"
+          value={rule.day_of_week}
+          options={DAYS}
+          onChange={(v) => onChange({ day_of_week: v })}
+          className="flex-1"
+        />
         <TimeField
           label="From"
           value={rule.start_time?.slice(0, 5)}
           onChange={(v) => onChange({ start_time: v })}
           className="flex-1"
         />
+      </View>
+
+      <View className="mt-3 flex-row gap-3">
         <TimeField
           label="To"
           value={rule.end_time?.slice(0, 5)}
           onChange={(v) => onChange({ end_time: v })}
           className="flex-1"
         />
+        <Select
+          label="Slot (min)"
+          value={rule.slot_duration}
+          options={DURATIONS}
+          onChange={(v) => onChange({ slot_duration: v })}
+          className="flex-1"
+        />
+        <NumField
+          label="Buffer (min)"
+          value={rule.buffer_minutes ?? 0}
+          onChange={(v) => onChange({ buffer_minutes: v })}
+          className="flex-1"
+        />
       </View>
 
-      <Text className="mb-1.5 text-[10px] font-sans-semibold uppercase tracking-wider text-slate">
-        Slot (min)
-      </Text>
-      <View className="mb-3 flex-row gap-2">
-        {DURATIONS.map((d) => (
-          <Chip
-            key={d}
-            label={String(d)}
-            active={rule.slot_duration === d}
-            onPress={() => onChange({ slot_duration: d })}
-          />
-        ))}
-      </View>
-
-      <Input
-        label="Buffer (min)"
-        value={String(rule.buffer_minutes ?? 0)}
-        onChangeText={(v) => onChange({ buffer_minutes: Number(v) || 0 })}
-        keyboardType="numeric"
-      />
-
-      <View className="flex-row items-center gap-2">
-        <Button variant="ghost" size="sm" onPress={onSave} loading={saving} className="flex-1">
+      <View className="mt-4 flex-row items-center justify-end gap-2">
+        <Button variant="gold" size="sm" onPress={onSave} loading={saving}>
           Save
         </Button>
-        <Pressable onPress={onDelete} className="rounded-full bg-red-50 p-2">
-          <Feather name="trash-2" size={13} color="#B91C1C" />
+        <Pressable
+          onPress={onDelete}
+          accessibilityRole="button"
+          accessibilityLabel="Delete this rule"
+          className="rounded-full bg-red-50 p-2.5"
+        >
+          <Feather name="trash-2" size={14} color="#B91C1C" />
         </Pressable>
       </View>
     </Card>
@@ -1203,8 +1213,7 @@ export default function MyAvailability() {
   return (
     <Screen onRefresh={fetchAll} refreshing={false}>
       <View className="mb-8">
-        <Text className="font-display text-3xl text-navy">My Availability</Text>
-        <Text className="mt-1 font-sans text-sm text-slate">
+        <Text className="font-sans text-sm text-slate">
           Set your weekly schedule, generate slots for a date range, then fine-tune them on
           the calendar.
         </Text>
@@ -1269,46 +1278,30 @@ export default function MyAvailability() {
               </View>
             ) : null}
 
-            <Text className="mb-1.5 text-[10px] font-sans-semibold uppercase tracking-wider text-slate">
-              Timezone
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="gap-2 pb-1"
+            {/* A dropdown, as on web. This was a horizontal chip scroller: finding
+                your own timezone meant swiping through nineteen long strings. */}
+            <Select
+              label="Timezone"
+              value={settings.timezone}
+              options={[...new Set([settings.timezone, ...COMMON_TZS])]}
+              onChange={(tz) => setSettings((s) => ({ ...s, timezone: tz }))}
+              searchable
               className="mb-4"
-            >
-              {[...new Set([settings.timezone, ...COMMON_TZS])].map((tz) => (
-                <Chip
-                  key={tz}
-                  label={tz}
-                  active={settings.timezone === tz}
-                  onPress={() => setSettings((s) => ({ ...s, timezone: tz }))}
-                />
-              ))}
-            </ScrollView>
+            />
 
-            <View className="flex-row gap-3">
-              <View className="flex-1">
-                <Input
-                  label="Booking horizon (days)"
-                  value={String(settings.booking_horizon_days)}
-                  onChangeText={(v) =>
-                    setSettings((s) => ({ ...s, booking_horizon_days: Number(v) || 0 }))
-                  }
-                  keyboardType="numeric"
-                />
-              </View>
-              <View className="flex-1">
-                <Input
-                  label="Min notice (hours)"
-                  value={String(settings.min_notice_hours)}
-                  onChangeText={(v) =>
-                    setSettings((s) => ({ ...s, min_notice_hours: Number(v) || 0 }))
-                  }
-                  keyboardType="numeric"
-                />
-              </View>
+            <View className="mb-5 flex-row gap-3">
+              <NumField
+                label="Booking horizon (days)"
+                value={settings.booking_horizon_days}
+                onChange={(v) => setSettings((s) => ({ ...s, booking_horizon_days: v }))}
+                className="flex-1"
+              />
+              <NumField
+                label="Min notice (hours)"
+                value={settings.min_notice_hours}
+                onChange={(v) => setSettings((s) => ({ ...s, min_notice_hours: v }))}
+                className="flex-1"
+              />
             </View>
 
             <Button variant="navy" onPress={saveSettings} fullWidth>

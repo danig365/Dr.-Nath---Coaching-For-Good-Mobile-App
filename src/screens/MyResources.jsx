@@ -230,7 +230,6 @@ export default function MyResources() {
         <Text className="mb-2 text-xs font-sans-semibold uppercase tracking-[2px] text-gold-deep">
           Your workspace
         </Text>
-        <Text className="font-display text-3xl text-navy">Resources</Text>
       </View>
 
       {/* ── Shared with you ─────────────────────────────────────────── */}

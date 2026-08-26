@@ -5,7 +5,7 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input } from "@/components/ui";
+import { Screen, Card, Button, Input, Select } from "@/components/ui";
 import { DateFilter } from "@/components/sessionUi";
 import { toast } from "@/lib/toast";
 import { confirm } from "@/lib/confirm";
@@ -153,37 +153,15 @@ function AddEditModal({ onClose, onSave, clients, initial }) {
 
           <ScrollView>
             {!isEdit ? (
-              <View className="mb-4">
-                <Text className="mb-1.5 text-xs font-sans-semibold uppercase tracking-wider text-slate">
-                  Client
-                </Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerClassName="gap-2 pb-1"
-                >
-                  {clients.map((c) => {
-                    const selected = String(clientId) === String(c.id);
-                    return (
-                      <Pressable
-                        key={c.id}
-                        onPress={() => setClientId(String(c.id))}
-                        className={`rounded-full px-4 py-2 ${
-                          selected ? "bg-gold" : "border border-gold/30 bg-cream"
-                        }`}
-                      >
-                        <Text
-                          className={`font-sans-medium text-sm ${
-                            selected ? "text-navy-deep" : "text-slate"
-                          }`}
-                        >
-                          {c.username}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
-              </View>
+              <Select
+                label="Client"
+                value={clientId}
+                onChange={setClientId}
+                options={clients.map((c) => ({ label: c.username, value: String(c.id) }))}
+                placeholder="Choose a client"
+                searchable={clients.length > 8}
+                className="mb-4"
+              />
             ) : null}
 
             <Input
@@ -371,18 +349,6 @@ export default function Milestones() {
 
   return (
     <Screen onRefresh={load} refreshing={false}>
-      {/* Header */}
-      <View className="mb-8 flex-row items-center justify-between gap-4">
-        <View className="flex-1 flex-row items-center gap-3">
-          <View className="h-11 w-11 items-center justify-center rounded-2xl bg-gold/15">
-            <Feather name="target" size={20} color={colors.gold} />
-          </View>
-          <Text className="flex-1 font-display text-3xl text-navy">
-            Milestones & Goals
-          </Text>
-        </View>
-      </View>
-
       {role === "coach" ? (
         <Button
           variant="gold"

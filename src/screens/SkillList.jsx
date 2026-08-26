@@ -137,9 +137,6 @@ export default function SkillList() {
 
   return (
     <Screen onRefresh={fetchAllSkills} refreshing={false}>
-      <Text className="mb-2 font-display text-3xl text-navy">
-        Browse <Text className="text-gold-deep">Sessions</Text>
-      </Text>
       <Text className="mb-8 font-sans text-base text-slate">
         Find a programme that fits what you're working on.
       </Text>

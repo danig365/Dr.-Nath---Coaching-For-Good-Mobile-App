@@ -4,7 +4,7 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input } from "@/components/ui";
+import { Screen, Card, Button, Input, Select } from "@/components/ui";
 import WorkspaceTabs from "@/components/WorkspaceTabs";
 import { DateFilter } from "@/components/sessionUi";
 import { toast } from "@/lib/toast";
@@ -361,21 +361,15 @@ function AssignModal({ template, clients, onClose, onAssigned }) {
           <Text className="mb-1 font-display text-xl text-navy">Send form</Text>
           <Text className="mb-4 font-sans text-sm text-slate">{template.title}</Text>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="gap-2 pb-1"
+          <Select
+            label="Client"
+            value={client}
+            onChange={setClient}
+            options={clients.map((c) => ({ label: c.username, value: String(c.id) }))}
+            placeholder="Choose a client"
+            searchable={clients.length > 8}
             className="mb-5"
-          >
-            {clients.map((c) => (
-              <Chip
-                key={c.id}
-                label={c.username}
-                active={String(client) === String(c.id)}
-                onPress={() => setClient(String(c.id))}
-              />
-            ))}
-          </ScrollView>
+          />
 
           <View className="flex-row gap-3">
             <Button variant="ghost" onPress={onClose} className="flex-1">
@@ -728,7 +722,6 @@ export default function Forms() {
         <Text className="mb-1 text-xs font-sans-semibold uppercase tracking-[2px] text-gold-deep">
           Template Builder
         </Text>
-        <Text className="font-display text-3xl text-navy">Forms & Surveys</Text>
         <Text className="mt-1 font-sans text-sm text-slate">
           {coach
             ? "Build reusable intake forms and feedback surveys, then send them to clients and read their responses."

@@ -273,7 +273,6 @@ export default function GroupSessions() {
         <Text className="mb-2 text-xs font-sans-semibold uppercase tracking-[2px] text-gold-deep">
           Coaching, together
         </Text>
-        <Text className="font-display text-3xl text-navy">Group Sessions</Text>
       </View>
 
       {sessions.length === 0 ? (

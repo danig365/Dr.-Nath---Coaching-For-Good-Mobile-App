@@ -5,7 +5,7 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input } from "@/components/ui";
+import { Screen, Card, Button, Input, Select } from "@/components/ui";
 import WorkspaceTabs from "@/components/WorkspaceTabs";
 import { toast } from "@/lib/toast";
 import { downloadResource, downloadSubmission } from "@/lib/download";
@@ -388,7 +388,6 @@ export default function ResourcesManage() {
         <Text className="mb-2 text-xs font-sans-semibold uppercase tracking-[2px] text-gold-deep">
           Coach workspace
         </Text>
-        <Text className="font-display text-3xl text-navy">Resources</Text>
       </View>
 
       {tab === "manage" ? (
@@ -439,26 +438,18 @@ export default function ResourcesManage() {
             />
 
             <FieldLabel>Make this a private folder for one client</FieldLabel>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="gap-2 pb-1"
+            {/* A dropdown, not a chip row: this list is a coach's whole client
+                base, so it only grows. Searchable for the same reason. */}
+            <Select
+              value={newFolderClient}
+              onChange={(v) => setNewFolderClient(v)}
+              searchable={clients.length > 8}
               className="mb-3"
-            >
-              <Chip
-                label="Shared folder"
-                active={!newFolderClient}
-                onPress={() => setNewFolderClient("")}
-              />
-              {clients.map((c) => (
-                <Chip
-                  key={c.id}
-                  label={`🔒 ${c.username}`}
-                  active={String(newFolderClient) === String(c.id)}
-                  onPress={() => setNewFolderClient(String(c.id))}
-                />
-              ))}
-            </ScrollView>
+              options={[
+                { label: "Shared folder — visible to everyone", value: "" },
+                ...clients.map((c) => ({ label: `🔒 ${c.username}`, value: String(c.id) })),
+              ]}
+            />
 
             {newFolderClient ? (
               <Text className="mb-3 font-sans text-xs text-blue-700">

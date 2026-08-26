@@ -695,10 +695,7 @@ export default function MySessions() {
 
   return (
     <Screen onRefresh={fetchSessions} refreshing={false}>
-      {/* ── Header ──────────────────────────────────────── */}
-      <Text className="font-display text-3xl text-navy">My Sessions</Text>
-
-      <View className="mt-4 flex-row items-center gap-3 rounded-2xl border border-gold/25 bg-cream-warm px-5 py-4">
+      <View className="flex-row items-center gap-3 rounded-2xl border border-gold/25 bg-cream-warm px-5 py-4">
         <Feather name="dollar-sign" size={18} color={colors.gold} />
         <View>
           <Text className="text-xs font-sans-semibold uppercase tracking-wider text-slate">

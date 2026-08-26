@@ -51,9 +51,6 @@ export default function CoachClients() {
 
   return (
     <Screen>
-      <Text className="mb-2 font-display text-3xl text-navy">
-        Your <Text className="text-gold-deep">Clients</Text>
-      </Text>
       <Text className="font-sans text-base text-slate">
         Everyone who has signed up — including people who haven't booked yet.
       </Text>

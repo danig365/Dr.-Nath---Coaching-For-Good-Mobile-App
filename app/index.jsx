@@ -9,7 +9,7 @@ import { colors } from "@/theme/colors";
 //
 //   not signed in        -> /login
 //   profile incomplete   -> /complete-profile
-//   coach / mentor       -> /(coach)/dashboard
+//   coach / mentor       -> /(coach)/skills   (as web: / redirects a coach there)
 //   everyone else        -> /(client)/dashboard
 export default function Index() {
   const { loading, isAuthenticated, profileComplete, role } = useAuth();
@@ -23,9 +23,12 @@ export default function Index() {
     );
   }
 
-  if (!isAuthenticated) return <Redirect href="/login" />;
+  // Not signed in -> the landing page, not straight to a login wall. Someone
+  // who has just installed the app may not be a client yet, and needs a route
+  // to the free chemistry session. Sign-in is one tap from there.
+  if (!isAuthenticated) return <Redirect href="/landing" />;
   if (!profileComplete) return <Redirect href="/complete-profile" />;
 
   const isCoach = role === "coach" || role === "mentor";
-  return <Redirect href={isCoach ? "/(coach)/dashboard" : "/(client)/dashboard"} />;
+  return <Redirect href={isCoach ? "/(coach)/skills" : "/(client)/book"} />;
 }

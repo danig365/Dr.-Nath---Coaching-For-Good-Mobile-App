@@ -4,7 +4,7 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input, EmptyState } from "@/components/ui";
+import { Screen, Card, Button, Input, EmptyState, Select } from "@/components/ui";
 import WorkspaceTabs from "@/components/WorkspaceTabs";
 import { toast } from "@/lib/toast";
 import { downloadFile } from "@/lib/download";
@@ -216,7 +216,6 @@ export default function Agreements() {
         <Text className="mb-1 text-xs font-sans-semibold uppercase tracking-[2px] text-gold-deep">
           E-Signatures
         </Text>
-        <Text className="font-display text-3xl text-navy">Agreements</Text>
         <Text className="mt-1 font-sans text-sm text-slate">
           {coach
             ? "Send documents to clients to sign, then counter-sign to complete."
@@ -242,33 +241,15 @@ export default function Agreements() {
           />
 
           <Text className="mb-1.5 font-sans-medium text-sm text-navy">Client</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="gap-2 pb-1"
+          <Select
+            title="Client"
+            value={form.client}
+            onChange={(v) => setForm((f) => ({ ...f, client: v }))}
+            options={clients.map((c) => ({ label: c.username, value: String(c.id) }))}
+            placeholder="Choose a client"
+            searchable={clients.length > 8}
             className="mb-4"
-          >
-            {clients.map((c) => {
-              const selected = String(form.client) === String(c.id);
-              return (
-                <Pressable
-                  key={c.id}
-                  onPress={() => setForm((f) => ({ ...f, client: String(c.id) }))}
-                  className={`rounded-full px-4 py-2 ${
-                    selected ? "bg-gold" : "border border-gold/25 bg-cream"
-                  }`}
-                >
-                  <Text
-                    className={`font-sans-medium text-sm ${
-                      selected ? "text-navy-deep" : "text-slate"
-                    }`}
-                  >
-                    {c.username}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+          />
 
           <Input
             label="Message to the client (optional)"

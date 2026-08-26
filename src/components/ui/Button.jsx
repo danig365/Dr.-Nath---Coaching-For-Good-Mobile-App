@@ -4,16 +4,22 @@ import { colors } from "@/theme/colors";
 
 // Pill buttons, matching the web's .gold-btn / .navy-btn / .outline-btn
 // (frontend/src/index.css). Buttons are rounded-full site-wide — keep it that way.
+// Press feedback uses NativeWind's `active:` variant rather than Pressable's
+// function-style prop: `style` accepts a function, but `className` must be a
+// string — NativeWind calls .split() on it, so a function crashes the render.
 const VARIANTS = {
-  gold: { container: "bg-gold", pressed: "bg-gold-light", label: "text-navy", spinner: colors.navy },
-  navy: { container: "bg-navy", pressed: "bg-navy-soft", label: "text-cream", spinner: colors.cream },
+  gold: { container: "bg-gold active:bg-gold-light", label: "text-navy", spinner: colors.navy },
+  navy: { container: "bg-navy active:bg-navy-soft", label: "text-cream", spinner: colors.cream },
   outline: {
-    container: "border-2 border-navy bg-transparent",
-    pressed: "border-2 border-gold bg-transparent",
+    container: "border-2 border-navy bg-transparent active:border-gold",
     label: "text-navy",
     spinner: colors.navy,
   },
-  ghost: { container: "bg-transparent", pressed: "bg-cream-warm", label: "text-navy", spinner: colors.navy },
+  ghost: {
+    container: "bg-transparent active:bg-cream-warm",
+    label: "text-navy",
+    spinner: colors.navy,
+  },
 };
 
 const SIZES = {
@@ -43,18 +49,16 @@ export default function Button({
       disabled={inactive}
       accessibilityRole="button"
       accessibilityState={{ disabled: inactive, busy: loading }}
-      className={({ pressed }) =>
-        [
-          "flex-row items-center justify-center rounded-full",
-          s.container,
-          pressed && !inactive ? v.pressed : v.container,
-          inactive ? "opacity-50" : "",
-          fullWidth ? "w-full" : "",
-          className,
-        ]
-          .filter(Boolean)
-          .join(" ")
-      }
+      className={[
+        "flex-row items-center justify-center rounded-full",
+        s.container,
+        v.container,
+        inactive ? "opacity-50" : "",
+        fullWidth ? "w-full" : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       {...rest}
     >
       {loading ? (
