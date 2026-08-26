@@ -18,6 +18,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button, Input } from "@/components/ui";
 import { toast } from "@/lib/toast";
 import { colors } from "@/theme/colors";
+import { useKeyboardHeight } from "@/lib/useKeyboardHeight";
 
 // Port of frontend/src/pages/CompleteProfilePage.jsx.
 //
@@ -95,6 +96,7 @@ function TagInput({ tags, onChange, placeholder }) {
 export default function CompleteProfilePage() {
   const { role, isAuthenticated, profileComplete, markProfileComplete, logout } = useAuth();
   const router = useRouter();
+  const keyboardHeight = useKeyboardHeight();
   const { next } = useLocalSearchParams();
 
   const isCoach = role === "coach";
@@ -334,6 +336,9 @@ export default function CompleteProfilePage() {
               <Text className="font-sans text-xs text-slate underline">Log out</Text>
             </Pressable>
           </View>
+
+          {/* Lets the fields below the focused one scroll clear of the keyboard. */}
+          <View style={{ height: keyboardHeight }} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

@@ -3,6 +3,7 @@ import { View, Text, Pressable, Modal, ScrollView, TextInput } from "react-nativ
 import Feather from "@expo/vector-icons/Feather";
 
 import { colors } from "@/theme/colors";
+import { useKeyboardHeight } from "@/lib/useKeyboardHeight";
 
 // Dropdown equivalent of the web app's <select>. Opens a modal list rather than
 // laying every choice out inline: a chip row only works while the options stay
@@ -25,6 +26,7 @@ export default function Select({
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const keyboardHeight = useKeyboardHeight();
 
   const items = options.map((o) =>
     typeof o === "object" && o !== null ? o : { label: String(o), value: o }
@@ -66,7 +68,11 @@ export default function Select({
       </Pressable>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={close}>
-        <Pressable onPress={close} className="flex-1 justify-center bg-navy-deep/60 px-8">
+        <Pressable
+          onPress={close}
+          style={{ paddingBottom: keyboardHeight }}
+          className="flex-1 justify-center bg-navy-deep/60 px-8"
+        >
           {/* Stops a tap inside the sheet from closing it. */}
           <Pressable onPress={() => {}} className="max-h-[70%] overflow-hidden rounded-2xl bg-white">
             {modalTitle ? (

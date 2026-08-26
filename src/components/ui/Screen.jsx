@@ -3,6 +3,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { colors } from "@/theme/colors";
 import { MENU_CLEARANCE, useAppMenuVisible } from "@/lib/appMenu";
+import { useKeyboardHeight } from "@/lib/useKeyboardHeight";
 
 // Standard screen shell: cream background, safe-area aware, optional scrolling,
 // pull-to-refresh and a centred loading state.
@@ -21,16 +22,19 @@ export default function Screen({
   className = "",
   contentClassName = "",
 }) {
-  // There is no tab bar — the Menu button floats over the bottom instead, so
-  // the last row of content needs room to clear it. The button is positioned at
-  // insets.bottom + 20, so the clearance has to include that inset too.
+  // Two things can sit over the bottom of a screen. The Menu button floats
+  // there (positioned at insets.bottom + 20, so the clearance includes that
+  // inset), and the software keyboard covers it while a field is focused —
+  // which otherwise leaves the fields below the focused one unreachable.
   //
   // These must stay above the `loading` early return: a hook that only runs on
   // some renders changes the hook order between them, which React 19 reports as
   // "Internal React error: Expected static flag was missing".
   const insets = useSafeAreaInsets();
   const menuVisible = useAppMenuVisible();
-  const bottomInset = menuVisible ? insets.bottom + MENU_CLEARANCE : 0;
+  const keyboardHeight = useKeyboardHeight();
+  const bottomInset =
+    (menuVisible ? insets.bottom + MENU_CLEARANCE : 0) + keyboardHeight;
 
   if (loading) {
     return (
