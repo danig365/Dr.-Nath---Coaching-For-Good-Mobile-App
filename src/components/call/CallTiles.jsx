@@ -31,7 +31,18 @@ export function RemoteTile({ entry, style }) {
       style={style}
     >
       {hasVideo ? (
-        <VideoTrack trackRef={entry.videoRef} style={{ flex: 1 }} objectFit="cover" />
+        // zOrder is required, not optional. Android stacks video surfaces in
+        // three layers, and @livekit/react-native's own guidance is 0 for the
+        // remote video in the background and 1 for the local video above it.
+        // Leaving this unset never set the native property, so the remote
+        // surface stayed in an unconfigured layer and rendered black — while
+        // the stats showed its track subscribed and decoding 720p happily.
+        <VideoTrack
+          trackRef={entry.videoRef}
+          style={{ flex: 1 }}
+          objectFit="cover"
+          zOrder={0}
+        />
       ) : (
         <Initial name={entry?.name} />
       )}
