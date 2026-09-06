@@ -672,6 +672,14 @@ export default function BookSessionPage() {
                 </View>
               )}
 
+              {/* Same as web: the button is dead until a time is picked, so say
+                  so rather than leaving it greyed with no explanation. */}
+              {!selectedSlot ? (
+                <Text className="mb-2 text-center font-sans text-xs text-gold-deep">
+                  Choose a time above to continue.
+                </Text>
+              ) : null}
+
               <Button
                 variant="gold"
                 onPress={handleSubmit}
