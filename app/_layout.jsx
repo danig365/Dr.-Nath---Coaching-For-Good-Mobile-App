@@ -23,6 +23,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import ToastHost from "@/components/ToastHost";
 import SessionStartBanner from "@/components/SessionStartBanner";
 import AppMenu from "@/components/AppMenu";
+import PushDeepLinks from "@/components/PushDeepLinks";
 import AssistantWidget from "@/components/AssistantWidget";
 import { colors } from "@/theme/colors";
 
@@ -107,6 +108,9 @@ export default function RootLayout() {
               shared routes it points at — /milestones, /habits, /coaches,
               /contact — which live outside both groups. */}
           <AppMenu />
+
+          {/* Routes a tapped notification to the screen it names. */}
+          <PushDeepLinks />
 
           {/* Mounted last so toasts sit above the banner. */}
           <ToastHost />
