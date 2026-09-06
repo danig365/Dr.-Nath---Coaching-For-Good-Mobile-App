@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { View, Text, Pressable, Modal } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { View, Text, Pressable, Modal, Animated, Easing } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,14 +28,56 @@ export default function GuestHeader({ onJump, floating = false }) {
   const router = useRouter();
   const { isAuthenticated, role } = useAuth();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const anim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!open) return;
+    setMounted(true);
+    Animated.timing(anim, {
+      toValue: 1,
+      duration: 260,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [open, anim]);
+
+  const dismiss = (then) => {
+    setOpen(false);
+    Animated.timing(anim, {
+      toValue: 0,
+      duration: 160,
+      easing: Easing.in(Easing.cubic),
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (finished) {
+        setMounted(false);
+        anim.setValue(0);
+        then?.();
+      }
+    });
+  };
+
+  // Each pill eases in slightly after the one above it.
+  const pillStyle = (i, total) => {
+    const from = (i / (total + 1)) * 0.5;
+    const range = anim.interpolate({
+      inputRange: [from, Math.min(from + 0.6, 1)],
+      outputRange: [0, 1],
+      extrapolate: "clamp",
+    });
+    return {
+      opacity: range,
+      transform: [
+        { translateY: range.interpolate({ inputRange: [0, 1], outputRange: [14, 0] }) },
+      ],
+    };
+  };
 
   const goSection = (key) =>
     onJump ? onJump(key) : router.push(key === "top" ? "/landing" : `/landing?section=${key}`);
 
-  const go = (fn) => {
-    setOpen(false);
-    fn();
-  };
+  const go = (fn) => dismiss(fn);
 
   const LINKS = [
     { label: "Home", action: () => goSection("top") },
@@ -84,29 +126,42 @@ export default function GuestHeader({ onJump, floating = false }) {
         </View>
       </SafeAreaView>
 
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable className="flex-1 bg-navy-deep/95" onPress={() => setOpen(false)}>
-          <SafeAreaView edges={["top"]} className="flex-1">
-            <View className="flex-row justify-end px-5 py-3">
-              <Pressable onPress={() => setOpen(false)} hitSlop={10} className="p-1">
-                <Feather name="x" size={26} color={colors.cream} />
-              </Pressable>
-            </View>
+      {/* A stack of pills rather than a full-screen list: the guest menu is six
+          short, flat items with no state to show, which is the shape this
+          treatment suits. The signed-in menu (AppMenu) stays a grouped sheet,
+          because sixteen items in five categories is not. */}
+      <Modal visible={mounted} transparent animationType="none" onRequestClose={() => dismiss()}>
+        <Animated.View style={{ opacity: anim }} className="absolute inset-0">
+          <Pressable
+            className="flex-1 bg-navy-deep/92"
+            onPress={() => dismiss()}
+            accessibilityLabel="Close menu"
+          />
+        </Animated.View>
 
-            <View className="mt-6 px-8">
-              {LINKS.map((l) => (
+        <SafeAreaView edges={["top"]} className="flex-1" pointerEvents="box-none">
+          <View className="flex-row items-center justify-end px-5" style={{ height: 88 }}>
+            <Pressable onPress={() => dismiss()} hitSlop={10} className="p-1">
+              <Feather name="x" size={26} color={colors.cream} />
+            </Pressable>
+          </View>
+
+          <View className="items-end gap-2.5 px-5 pt-2" pointerEvents="box-none">
+            {LINKS.map((l, i) => (
+              <Animated.View key={l.label} style={pillStyle(i, LINKS.length + 2)}>
                 <Pressable
-                  key={l.label}
                   onPress={() => go(l.action)}
-                  className="border-b border-white/10 py-5"
+                  className="rounded-full border border-cream/15 bg-cream/10 px-6 py-3.5 active:bg-cream/20"
                 >
-                  <Text className="font-display text-2xl text-cream">{l.label}</Text>
+                  <Text className="font-sans-semibold text-base text-cream">{l.label}</Text>
                 </Pressable>
-              ))}
+              </Animated.View>
+            ))}
 
-              {/* Web swaps guestLinks for the signed-in nav on this same page
-                  (flatLinks in Navbar.jsx). Offering "Login" to someone already
-                  logged in is the mobile version of not doing that. */}
+            {/* Web swaps guestLinks for the signed-in nav on this same page
+                (flatLinks in Navbar.jsx). Offering "Login" to someone already
+                logged in is the mobile version of not doing that. */}
+            <Animated.View style={pillStyle(LINKS.length, LINKS.length + 2)} className="mt-3">
               <Pressable
                 onPress={() =>
                   go(() =>
@@ -115,24 +170,26 @@ export default function GuestHeader({ onJump, floating = false }) {
                       : router.push("/login")
                   )
                 }
-                className="mt-8 items-center rounded-full border border-cream/40 py-4"
+                className="rounded-full border border-cream/40 px-7 py-3.5 active:bg-cream/10"
               >
                 <Text className="font-sans-bold text-base text-cream">
                   {isAuthenticated ? "Go to my account" : "Login"}
                 </Text>
               </Pressable>
+            </Animated.View>
 
+            <Animated.View style={pillStyle(LINKS.length + 1, LINKS.length + 2)}>
               <Pressable
                 onPress={() => go(() => goSection("newsletter"))}
-                className="mt-3 items-center rounded-full bg-gold py-4"
+                className="rounded-full bg-gold px-7 py-3.5 active:bg-gold-light"
               >
                 <Text className="font-sans-bold text-base text-navy-deep">
                   Newsletter Sign Up
                 </Text>
               </Pressable>
-            </View>
-          </SafeAreaView>
-        </Pressable>
+            </Animated.View>
+          </View>
+        </SafeAreaView>
       </Modal>
     </>
   );
