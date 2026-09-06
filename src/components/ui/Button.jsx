@@ -20,6 +20,12 @@ const VARIANTS = {
     label: "text-navy",
     spinner: colors.navy,
   },
+  // `outline` is navy on cream and vanishes against a dark card.
+  outlineLight: {
+    container: "border-2 border-cream/40 bg-transparent active:border-gold",
+    label: "text-cream",
+    spinner: colors.cream,
+  },
 };
 
 const SIZES = {

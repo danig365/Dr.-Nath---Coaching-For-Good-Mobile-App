@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   View,
   Text,
+  TextInput,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -12,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 
 import { api, publicApi } from "@/api/client";
-import { Button, Input } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { toast } from "@/lib/toast";
 import { useKeyboardHeight } from "@/lib/useKeyboardHeight";
 import { colors } from "@/theme/colors";
@@ -47,6 +48,56 @@ function PasswordStrength({ password }) {
           </Text>
         </View>
       ))}
+    </View>
+  );
+}
+
+// Field on the dark card: cream input, uppercase gold label — matching the
+// login screen and frontend/src/pages/Register.jsx. The shared <Input> is built
+// for cream screens (white box, navy label) and is unreadable here.
+function Field({ label, error, hint, className = "", multiline = false, ...rest }) {
+  const [focused, setFocused] = useState(false);
+
+  return (
+    <View className={`mb-4 ${className}`}>
+      {label ? (
+        <Text
+          className="mb-1.5 text-xs font-sans-semibold uppercase tracking-wider"
+          style={{ color: "rgba(200,169,81,0.8)" }}
+        >
+          {label}
+        </Text>
+      ) : null}
+
+      <TextInput
+        placeholderTextColor={colors.slateLight}
+        multiline={multiline}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        className={`rounded-xl px-4 py-3 font-sans text-sm ${multiline ? "min-h-[96px]" : ""}`}
+        style={{
+          backgroundColor: "#FAF6EC",
+          borderWidth: 1,
+          borderColor: error
+            ? "#EF4444"
+            : focused
+              ? "#C8A951"
+              : "rgba(200,169,81,0.3)",
+          color: "#1B2B4A",
+          textAlignVertical: multiline ? "top" : "auto",
+        }}
+        {...rest}
+      />
+
+      {error ? (
+        <Text className="mt-1 font-sans text-xs" style={{ color: "#FCA5A5" }}>
+          {error}
+        </Text>
+      ) : hint ? (
+        <Text className="mt-1 font-sans text-xs" style={{ color: "rgba(250,246,236,0.5)" }}>
+          {hint}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -320,10 +371,17 @@ export default function Register() {
             </View>
           ) : null}
 
-          <View className="mt-6 rounded-2xl bg-cream p-5">
+          <View
+            className="mt-6 overflow-hidden rounded-2xl p-5"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.04)",
+              borderWidth: 1,
+              borderColor: "rgba(200,169,81,0.15)",
+            }}
+          >
             {step === 0 && (
               <>
-                <Input
+                <Field
                   label="Username"
                   placeholder="Choose a username"
                   value={form.username}
@@ -333,7 +391,7 @@ export default function Register() {
                   error={fieldErrors.username}
                 />
 
-                <Input
+                <Field
                   label="Email"
                   placeholder="your@email.com"
                   value={form.email}
@@ -354,7 +412,7 @@ export default function Register() {
                 ) : null}
 
                 <View className="relative">
-                  <Input
+                  <Field
                     label="Password"
                     placeholder="Create a strong password"
                     value={form.password}
@@ -378,7 +436,7 @@ export default function Register() {
                 <PasswordStrength password={password} />
 
                 <View className="relative">
-                  <Input
+                  <Field
                     label="Confirm Password"
                     placeholder="Repeat your password"
                     value={form.password2}
@@ -429,16 +487,21 @@ export default function Register() {
                       key={opt.value}
                       onPress={() => setField("role", opt.value)}
                       className={`rounded-xl border-2 p-5 ${
-                        selected ? "border-gold bg-gold/10" : "border-cream-warm bg-white"
+                        selected ? "border-gold bg-gold/15" : "border-gold/25 bg-white/5"
                       }`}
                     >
                       <View className="flex-row items-start gap-4">
                         <Text className="text-2xl">{opt.icon}</Text>
                         <View className="flex-1">
-                          <Text className="mb-1 font-sans-semibold text-sm text-navy">
+                          <Text className="mb-1 font-sans-semibold text-sm text-cream">
                             {opt.title}
                           </Text>
-                          <Text className="font-sans text-xs text-slate">{opt.desc}</Text>
+                          <Text
+                            className="font-sans text-xs"
+                            style={{ color: "rgba(250,246,236,0.6)" }}
+                          >
+                            {opt.desc}
+                          </Text>
                         </View>
                         {selected ? (
                           <Feather name="check-circle" size={18} color={colors.gold} />
@@ -454,7 +517,7 @@ export default function Register() {
               <>
                 {form.role === "coach" && (
                   <>
-                    <Input
+                    <Field
                       label="Specialties"
                       placeholder="e.g. Leadership, Executive, Career"
                       onChangeText={(v) =>
@@ -465,7 +528,7 @@ export default function Register() {
                       }
                       hint="Separate with commas"
                     />
-                    <Input
+                    <Field
                       label="Certifications"
                       placeholder="e.g. ICF PCC, EMCC"
                       onChangeText={(v) =>
@@ -476,19 +539,19 @@ export default function Register() {
                       }
                       hint="Separate with commas"
                     />
-                    <Input
+                    <Field
                       label="Hourly Rate (USD)"
                       placeholder="150"
                       keyboardType="numeric"
                       onChangeText={(v) => setField("hourly_rate", v)}
                     />
-                    <Input
+                    <Field
                       label="Years Exp."
                       placeholder="5"
                       keyboardType="numeric"
                       onChangeText={(v) => setField("years_experience", v)}
                     />
-                    <Input
+                    <Field
                       label="Industries"
                       placeholder="e.g. Healthcare, Finance, Tech"
                       onChangeText={(v) =>
@@ -504,13 +567,13 @@ export default function Register() {
 
                 {form.role === "client" && (
                   <>
-                    <Input
+                    <Field
                       label="Organisation"
                       placeholder="Your company or organisation"
                       value={form.organisation}
                       onChangeText={(v) => setField("organisation", v)}
                     />
-                    <Input
+                    <Field
                       label="Job Title"
                       placeholder="e.g. Product Manager"
                       value={form.job_title}
@@ -519,7 +582,7 @@ export default function Register() {
                   </>
                 )}
 
-                <Input
+                <Field
                   label="About You (Optional)"
                   placeholder="Tell us a bit about yourself..."
                   value={form.bio}
@@ -530,15 +593,24 @@ export default function Register() {
             )}
 
             {formError && (step === 1 || step === 2) ? (
-              <View className="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3">
-                <Text className="font-sans text-sm text-red-700">{formError}</Text>
+              <View
+                className="mb-4 rounded-xl px-4 py-3"
+                style={{
+                  backgroundColor: "rgba(239,68,68,0.12)",
+                  borderWidth: 1,
+                  borderColor: "rgba(239,68,68,0.4)",
+                }}
+              >
+                <Text className="font-sans text-sm" style={{ color: "#FCA5A5" }}>
+                  {formError}
+                </Text>
               </View>
             ) : null}
 
             <View className="flex-row gap-3 pt-1">
               {step > 0 ? (
                 <Button
-                  variant="outline"
+                  variant="outlineLight"
                   onPress={() => setStep((s) => s - 1)}
                   className="flex-1"
                 >
