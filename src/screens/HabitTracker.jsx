@@ -4,7 +4,7 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input, Select } from "@/components/ui";
+import { Screen, Card, Button, Input, Select, ModalBackdrop } from "@/components/ui";
 import { toast } from "@/lib/toast";
 import { confirm } from "@/lib/confirm";
 import { colors } from "@/theme/colors";
@@ -252,7 +252,7 @@ function HabitModal({ initial, onClose, onSave }) {
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+      <ModalBackdrop>
         <View className="w-full max-w-md rounded-2xl bg-white p-6">
           <View className="mb-4 flex-row items-center justify-between">
             <Text className="font-display text-xl text-navy">
@@ -290,7 +290,7 @@ function HabitModal({ initial, onClose, onSave }) {
             </Button>
           </View>
         </View>
-      </View>
+      </ModalBackdrop>
     </Modal>
   );
 }
@@ -342,7 +342,7 @@ function SuggestModal({ clientId, clientName, onClose, onAssigned }) {
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+      <ModalBackdrop>
         <View className="max-h-[85%] w-full max-w-lg rounded-2xl bg-white p-6">
           <View className="mb-1 flex-row items-center justify-between">
             <Text className="font-display text-xl text-navy">Suggest habits with AI</Text>
@@ -430,7 +430,7 @@ function SuggestModal({ clientId, clientName, onClose, onAssigned }) {
             </Text>
           ) : null}
         </View>
-      </View>
+      </ModalBackdrop>
     </Modal>
   );
 }

@@ -5,7 +5,7 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input, Select } from "@/components/ui";
+import { Screen, Card, Button, Input, Select, ModalBackdrop } from "@/components/ui";
 import WorkspaceTabs from "@/components/WorkspaceTabs";
 import { toast } from "@/lib/toast";
 import { downloadResource, downloadSubmission } from "@/lib/download";
@@ -838,7 +838,7 @@ export default function ResourcesManage() {
       {/* Edit modal */}
       {edit ? (
         <Modal visible transparent animationType="fade" onRequestClose={() => setEdit(null)}>
-          <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+          <ModalBackdrop>
             <View className="max-h-[85%] w-full max-w-lg rounded-2xl border border-gold/20 bg-cream p-6">
               <View className="mb-4 flex-row items-center justify-between">
                 <Text className="font-display text-xl text-navy">Edit Resource</Text>
@@ -984,7 +984,7 @@ export default function ResourcesManage() {
                 </Button>
               </View>
             </View>
-          </View>
+          </ModalBackdrop>
         </Modal>
       ) : null}
     </Screen>

@@ -4,7 +4,7 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input, EmptyState, Select } from "@/components/ui";
+import { Screen, Card, Button, Input, EmptyState, Select, ModalBackdrop } from "@/components/ui";
 import WorkspaceTabs from "@/components/WorkspaceTabs";
 import { toast } from "@/lib/toast";
 import { downloadFile } from "@/lib/download";
@@ -49,7 +49,7 @@ function ActionModal({ mode, doc, onClose, onSubmit }) {
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+      <ModalBackdrop>
         <View className="w-full max-w-md rounded-2xl bg-white p-6">
           <View className="mb-1 flex-row items-center justify-between">
             <Text className="flex-1 font-display text-xl text-navy">
@@ -109,7 +109,7 @@ function ActionModal({ mode, doc, onClose, onSubmit }) {
             </Button>
           </View>
         </View>
-      </View>
+      </ModalBackdrop>
     </Modal>
   );
 }

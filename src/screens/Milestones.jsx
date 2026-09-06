@@ -5,7 +5,7 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input, Select } from "@/components/ui";
+import { Screen, Card, Button, Input, Select, ModalBackdrop } from "@/components/ui";
 import { DateFilter } from "@/components/sessionUi";
 import { toast } from "@/lib/toast";
 import { confirm } from "@/lib/confirm";
@@ -136,7 +136,7 @@ function AddEditModal({ onClose, onSave, clients, initial }) {
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+      <ModalBackdrop>
         <View className="max-h-[90%] w-full max-w-md rounded-2xl bg-white p-6">
           <View className="mb-5 flex-row items-center justify-between">
             <Text className="font-display text-xl text-navy">
@@ -193,7 +193,7 @@ function AddEditModal({ onClose, onSave, clients, initial }) {
             </Button>
           </View>
         </View>
-      </View>
+      </ModalBackdrop>
     </Modal>
   );
 }

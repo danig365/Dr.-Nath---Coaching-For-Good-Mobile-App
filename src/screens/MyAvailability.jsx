@@ -7,7 +7,7 @@ import * as Clipboard from "expo-clipboard";
 import { api } from "@/api/client";
 import { API_HOST } from "@/api/config";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input, Select } from "@/components/ui";
+import { Screen, Card, Button, Input, Select, ModalBackdrop } from "@/components/ui";
 import { DateFilter, TimeField, DateTimeField } from "@/components/sessionUi";
 import GoogleCalendarCard from "@/components/GoogleCalendarCard";
 import SentInvitesPanel from "@/components/SentInvitesPanel";
@@ -701,7 +701,7 @@ function ShareSlotModal({ slot, skills, tz, onClose, onSent }) {
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+      <ModalBackdrop>
         <View className="max-h-[90%] w-full max-w-md rounded-2xl bg-cream p-6">
           <View className="mb-1 flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
@@ -838,7 +838,7 @@ function ShareSlotModal({ slot, skills, tz, onClose, onSent }) {
             </View>
           </ScrollView>
         </View>
-      </View>
+      </ModalBackdrop>
     </Modal>
   );
 }

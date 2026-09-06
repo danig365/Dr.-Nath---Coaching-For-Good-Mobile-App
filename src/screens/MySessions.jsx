@@ -5,7 +5,7 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input } from "@/components/ui";
+import { Screen, Card, Button, Input, ModalBackdrop } from "@/components/ui";
 import SessionFeedbackCard from "@/components/SessionFeedbackCard";
 import AddToCalendar from "@/components/AddToCalendar";
 import SessionReflectionModal from "@/components/SessionReflectionModal";
@@ -919,7 +919,7 @@ export default function MySessions() {
         animationType="fade"
         onRequestClose={() => setCancelTarget(null)}
       >
-        <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+        <ModalBackdrop>
           <View className="w-full max-w-sm items-center rounded-2xl border border-gold/20 bg-cream p-8">
             <Text className="mb-4 text-4xl">⚠️</Text>
             <Text className="mb-2 font-display text-xl text-navy">Cancel Session</Text>
@@ -939,7 +939,7 @@ export default function MySessions() {
               </Button>
             </View>
           </View>
-        </View>
+        </ModalBackdrop>
       </Modal>
 
       {/* ── Meeting Link Modal ───────────────────────────── */}
@@ -949,7 +949,7 @@ export default function MySessions() {
         animationType="fade"
         onRequestClose={() => setMeetingTarget(null)}
       >
-        <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+        <ModalBackdrop>
           <View className="w-full max-w-md rounded-2xl border border-gold/20 bg-cream p-8">
             <View className="mb-4 h-12 w-12 items-center justify-center rounded-2xl bg-gold/15">
               <Feather name="link" size={20} color={colors.gold} />
@@ -978,7 +978,7 @@ export default function MySessions() {
               </Button>
             </View>
           </View>
-        </View>
+        </ModalBackdrop>
       </Modal>
 
       {/* ── Change Program Modal ─────────────────────────── */}
@@ -988,7 +988,7 @@ export default function MySessions() {
         animationType="fade"
         onRequestClose={() => setChangeTarget(null)}
       >
-        <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+        <ModalBackdrop>
           <View className="max-h-[85%] w-full max-w-md rounded-2xl border border-gold/20 bg-cream p-8">
             <View className="mb-4 h-12 w-12 items-center justify-center rounded-2xl bg-gold/15">
               <Feather name="repeat" size={20} color={colors.gold} />
@@ -1043,7 +1043,7 @@ export default function MySessions() {
               </Button>
             </View>
           </View>
-        </View>
+        </ModalBackdrop>
       </Modal>
 
       {/* ── Roster Modal ─────────────────────────────────── */}
@@ -1053,7 +1053,7 @@ export default function MySessions() {
         animationType="fade"
         onRequestClose={() => setRosterSession(null)}
       >
-        <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+        <ModalBackdrop>
           <View className="w-full max-w-md rounded-2xl border border-gold/20 bg-cream p-6">
             <View className="mb-4 flex-row items-center gap-3">
               <View className="h-10 w-10 items-center justify-center rounded-xl bg-gold/15">
@@ -1124,7 +1124,7 @@ export default function MySessions() {
               Close
             </Button>
           </View>
-        </View>
+        </ModalBackdrop>
       </Modal>
 
       {reflectSession ? (

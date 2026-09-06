@@ -5,7 +5,7 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input } from "@/components/ui";
+import { Screen, Card, Button, Input, ModalBackdrop } from "@/components/ui";
 import SessionFeedbackCard from "@/components/SessionFeedbackCard";
 import AddToCalendar from "@/components/AddToCalendar";
 import SessionReflectionModal from "@/components/SessionReflectionModal";
@@ -844,7 +844,7 @@ export default function MyLearning() {
         animationType="fade"
         onRequestClose={() => setShowCancelModal(false)}
       >
-        <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+        <ModalBackdrop>
           <View className="w-full max-w-sm items-center rounded-2xl border border-gold/20 bg-cream p-8">
             <Text className="mb-3 text-4xl">⚠️</Text>
             <Text className="mb-2 font-display text-xl text-navy">Cancel Session?</Text>
@@ -875,7 +875,7 @@ export default function MyLearning() {
               </Button>
             </View>
           </View>
-        </View>
+        </ModalBackdrop>
       </Modal>
 
       {/* ── Feedback Modal ───────────────────────────────── */}
@@ -885,7 +885,7 @@ export default function MyLearning() {
         animationType="fade"
         onRequestClose={() => setShowFeedbackModal(false)}
       >
-        <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+        <ModalBackdrop>
           <View className="w-full max-w-lg overflow-hidden rounded-2xl border border-gold/20 bg-cream">
             <View className="h-1 w-full bg-gold" />
             <View className="p-6">
@@ -961,7 +961,7 @@ export default function MyLearning() {
               </View>
             </View>
           </View>
-        </View>
+        </ModalBackdrop>
       </Modal>
 
       {reflectSession ? (

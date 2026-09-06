@@ -4,7 +4,7 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
-import { Screen, Card, Button, Input, Select } from "@/components/ui";
+import { Screen, Card, Button, Input, Select, ModalBackdrop } from "@/components/ui";
 import WorkspaceTabs from "@/components/WorkspaceTabs";
 import { DateFilter } from "@/components/sessionUi";
 import { toast } from "@/lib/toast";
@@ -148,7 +148,7 @@ function TemplateModal({ template, onClose, onSaved }) {
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+      <ModalBackdrop>
         <View className="max-h-[90%] w-full max-w-2xl rounded-2xl bg-white">
           <View className="flex-row items-center justify-between border-b border-gold/20 p-5">
             <Text className="font-display text-xl text-navy">
@@ -327,7 +327,7 @@ function TemplateModal({ template, onClose, onSaved }) {
             </Button>
           </View>
         </View>
-      </View>
+      </ModalBackdrop>
     </Modal>
   );
 }
@@ -356,7 +356,7 @@ function AssignModal({ template, clients, onClose, onAssigned }) {
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+      <ModalBackdrop>
         <View className="w-full max-w-md rounded-2xl bg-white p-6">
           <Text className="mb-1 font-display text-xl text-navy">Send form</Text>
           <Text className="mb-4 font-sans text-sm text-slate">{template.title}</Text>
@@ -380,7 +380,7 @@ function AssignModal({ template, clients, onClose, onAssigned }) {
             </Button>
           </View>
         </View>
-      </View>
+      </ModalBackdrop>
     </Modal>
   );
 }
@@ -389,7 +389,7 @@ function AssignModal({ template, clients, onClose, onAssigned }) {
 function ResponsesModal({ assignment, onClose }) {
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+      <ModalBackdrop>
         <View className="max-h-[90%] w-full max-w-lg rounded-2xl bg-white">
           <View className="flex-row items-center justify-between border-b border-gold/20 p-5">
             <View className="min-w-0 flex-1">
@@ -416,7 +416,7 @@ function ResponsesModal({ assignment, onClose }) {
             ))}
           </ScrollView>
         </View>
-      </View>
+      </ModalBackdrop>
     </Modal>
   );
 }
@@ -465,7 +465,7 @@ function FillModal({ assignment, onClose, onSubmitted }) {
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 items-center justify-center bg-navy-deep/60 p-4">
+      <ModalBackdrop>
         <View className="max-h-[90%] w-full max-w-lg rounded-2xl bg-white">
           <View className="flex-row items-center justify-between border-b border-gold/20 p-5">
             <View className="min-w-0 flex-1">
@@ -629,7 +629,7 @@ function FillModal({ assignment, onClose, onSubmitted }) {
             </Button>
           </View>
         </View>
-      </View>
+      </ModalBackdrop>
     </Modal>
   );
 }
