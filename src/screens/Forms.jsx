@@ -658,6 +658,7 @@ export default function Forms() {
   const [loading, setLoading] = useState(true);
   const [editTemplate, setEditTemplate] = useState(null); // {} = new, {id...} = edit
   const [assignTemplate, setAssignTemplate] = useState(null);
+  const [results, setResults] = useState(null);
   const [viewResponse, setViewResponse] = useState(null);
   const [fillTarget, setFillTarget] = useState(null);
 
@@ -701,6 +702,39 @@ export default function Forms() {
       fetchAll();
     } catch {
       toast.error("Could not archive.");
+    }
+  };
+
+  // Dr Nath asked to poll "currently registered clients" — everyone signed up,
+  // not just those who have booked. Re-running only reaches people who
+  // registered since; nobody gets a second copy.
+  const sendToAll = async (t) => {
+    const ok = await confirm(
+      `"${t.title}" will go to every registered client.`,
+      { title: "Send to all clients?", confirmLabel: "Send", destructive: false }
+    );
+    if (!ok) return;
+    try {
+      const res = await api.post(`/forms/templates/${t.id}/send-to-all/`);
+      const { assigned, skipped_already_sent: skipped } = res.data;
+      toast.success(
+        assigned
+          ? `Sent to ${assigned} client${assigned === 1 ? "" : "s"}.` +
+            (skipped ? ` ${skipped} already had it.` : "")
+          : "Everyone already has this form."
+      );
+      fetchAll();
+    } catch {
+      toast.error("Could not send to everyone.");
+    }
+  };
+
+  const openResults = async (t) => {
+    try {
+      const res = await api.get(`/forms/templates/${t.id}/results/`);
+      setResults(res.data);
+    } catch {
+      toast.error("Could not load results.");
     }
   };
 
@@ -783,6 +817,12 @@ export default function Forms() {
                     <View className="mt-3 flex-row flex-wrap items-center gap-2">
                       <Button variant="gold" size="sm" onPress={() => setAssignTemplate(t)}>
                         Send to client
+                      </Button>
+                      <Button variant="navy" size="sm" onPress={() => sendToAll(t)}>
+                        Send to all clients
+                      </Button>
+                      <Button variant="ghost" size="sm" onPress={() => openResults(t)}>
+                        Results
                       </Button>
                       <Button variant="ghost" size="sm" onPress={() => setEditTemplate(t)}>
                         Edit
@@ -932,6 +972,72 @@ export default function Forms() {
             fetchAll();
           }}
         />
+      ) : null}
+
+      {results ? (
+        <Modal visible transparent animationType="fade" onRequestClose={() => setResults(null)}>
+          <ModalBackdrop>
+            <View className="max-h-[85%] w-full max-w-md rounded-2xl bg-white p-6">
+              <Text className="font-display text-xl text-navy">{results.title}</Text>
+              <Text className="mb-4 font-sans text-sm text-slate">
+                {results.completed} of {results.sent} answered
+              </Text>
+
+              <ScrollView>
+                {results.questions.map((q) => (
+                  <View key={q.id} className="mb-5">
+                    <Text className="mb-1.5 font-sans-semibold text-sm text-navy">
+                      {q.label}
+                    </Text>
+
+                    {q.average != null ? (
+                      <Text className="mb-1 font-sans text-sm" style={{ color: "#2F6B4F" }}>
+                        Average: {q.average}
+                      </Text>
+                    ) : null}
+
+                    {q.counts && Object.keys(q.counts).length > 0
+                      ? Object.entries(q.counts).map(([label, n]) => {
+                          const pct = q.answered ? Math.round((n / q.answered) * 100) : 0;
+                          return (
+                            <View key={label} className="mb-1 flex-row items-center gap-2">
+                              <Text className="w-20 font-sans text-xs text-slate" numberOfLines={1}>
+                                {label}
+                              </Text>
+                              <View className="h-2 flex-1 rounded-full bg-cream-warm">
+                                <View
+                                  className="h-2 rounded-full bg-gold"
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </View>
+                              <Text className="w-14 text-right font-sans text-xs text-navy">
+                                {n} · {pct}%
+                              </Text>
+                            </View>
+                          );
+                        })
+                      : q.answers
+                        ? q.answers.length
+                          ? q.answers.map((a, i) => (
+                              <Text
+                                key={i}
+                                className="mb-1 rounded-lg bg-cream px-3 py-2 font-sans text-sm text-navy"
+                              >
+                                {a}
+                              </Text>
+                            ))
+                          : <Text className="font-sans text-sm text-slate">No answers yet.</Text>
+                        : null}
+                  </View>
+                ))}
+              </ScrollView>
+
+              <Button variant="navy" onPress={() => setResults(null)} fullWidth className="mt-2">
+                Close
+              </Button>
+            </View>
+          </ModalBackdrop>
+        </Modal>
       ) : null}
 
       {assignTemplate ? (
