@@ -65,6 +65,13 @@
         "projectId": "0553c928-397c-4cb8-96e2-514aead5b4f9"
       }
     },
-    "owner": "danishrehman78677"
+    "owner": "danishrehman78677",
+    "updates": {
+      "url": "https://u.expo.dev/0553c928-397c-4cb8-96e2-514aead5b4f9",
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
   }
 }
