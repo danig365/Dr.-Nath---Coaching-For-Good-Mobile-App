@@ -38,6 +38,19 @@ import { colors } from "@/theme/colors";
 // @/components/sessionUi, shared with the client's My Learning screen.
 
 // ─── Coach: correct a finished session's outcome ─────────────────────────────
+// What actually happened, for a finished session: when it really started and
+// ended, and how long it really ran. `duration` is only what was booked — Dr
+// Nath asked for the real figures on completed sessions.
+function actualRun(session) {
+  if (!session.actual_start || !session.ended_at) return null;
+  const t = (d) =>
+    new Date(d).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const mins = session.actual_duration_minutes;
+  return `${t(session.actual_start)} – ${t(session.ended_at)}${
+    mins ? ` · ${mins} min actual` : ""
+  }`;
+}
+
 const OUTCOME_OPTIONS = [
   { value: "completed", label: "Took place — on the platform" },
   { value: "held_offline", label: "Took place — off the platform (e.g. WhatsApp)" },
@@ -143,6 +156,17 @@ function SessionCard({
               <View className="rounded-full border border-gold/20 bg-gold/10 px-2.5 py-1">
                 <Text className="font-sans-semibold text-xs text-gold-deep">
                   {session.duration} min
+                </Text>
+              </View>
+            ) : null}
+
+            {/* Only once it has actually run. Historical sessions have no end
+                time recorded, so they show nothing rather than a guess. */}
+            {actualRun(session) ? (
+              <View className="flex-row items-center gap-1 rounded-full border border-green-700/20 bg-green-50 px-2.5 py-1">
+                <Feather name="clock" size={10} color="#2F6B4F" />
+                <Text className="font-sans-semibold text-xs" style={{ color: "#2F6B4F" }}>
+                  {actualRun(session)}
                 </Text>
               </View>
             ) : null}
