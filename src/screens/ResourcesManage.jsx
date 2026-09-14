@@ -11,6 +11,7 @@ import { toast } from "@/lib/toast";
 import { downloadResource, downloadSubmission } from "@/lib/download";
 import { pickFile, appendFile } from "@/lib/filePicker";
 import { colors } from "@/theme/colors";
+import { useAccessGuard } from "@/lib/accessGuard";
 
 // Port of frontend/src/pages/ResourcesManage.jsx — the coach's resource library
 // and the client-submission inbox.
@@ -120,6 +121,7 @@ function FieldLabel({ children }) {
 
 export default function ResourcesManage() {
   const { isAuthenticated, isCoach, logout } = useAuth();
+  const { requireCoach } = useAccessGuard();
   const params = useLocalSearchParams();
 
   const [folders, setFolders] = useState([]);
@@ -139,10 +141,7 @@ export default function ResourcesManage() {
   const tab = params.tab === "inbox" ? "inbox" : "manage";
 
   const fetchAll = useCallback(async () => {
-    if (!isAuthenticated || !isCoach()) {
-      logout();
-      return;
-    }
+    if (requireCoach()) return;
     setLoading(true);
     try {
       const [f, r, c, g, s] = await Promise.all([

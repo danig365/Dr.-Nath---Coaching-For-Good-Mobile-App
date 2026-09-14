@@ -15,6 +15,7 @@ import { GROUP_SESSIONS_ENABLED } from "@/config/features";
 import { SESSION_GRACE_MS } from "@/lib/sessionTiming";
 import { toast } from "@/lib/toast";
 import { colors } from "@/theme/colors";
+import { useAccessGuard } from "@/lib/accessGuard";
 
 // Port of frontend/src/pages/MyAvailability.jsx — the coach's schedule, slot
 // calendar, group sessions and sent invites.
@@ -847,6 +848,7 @@ function ShareSlotModal({ slot, skills, tz, onClose, onSent }) {
 export default function MyAvailability() {
   const router = useRouter();
   const { isAuthenticated, isCoach, logout } = useAuth();
+  const { requireCoach } = useAccessGuard();
 
   const [tab, setTab] = useState("rules");
   const [rules, setRules] = useState([]);
@@ -898,10 +900,7 @@ export default function MyAvailability() {
   );
 
   const fetchAll = useCallback(async () => {
-    if (!isAuthenticated || !isCoach()) {
-      logout();
-      return;
-    }
+    if (requireCoach()) return;
     setLoading(true);
     try {
       const [r, s, p, g, sk] = await Promise.all([

@@ -10,6 +10,7 @@ import { toast } from "@/lib/toast";
 import { downloadFile } from "@/lib/download";
 import { pickFile, appendFile } from "@/lib/filePicker";
 import { colors } from "@/theme/colors";
+import { useAccessGuard } from "@/lib/accessGuard";
 
 // Port of frontend/src/pages/Agreements.jsx.
 //
@@ -116,6 +117,7 @@ function ActionModal({ mode, doc, onClose, onSubmit }) {
 
 export default function Agreements() {
   const { isAuthenticated, isCoach, logout } = useAuth();
+  const { requireSignedIn } = useAccessGuard();
   const coach = isCoach();
 
   const [docs, setDocs] = useState([]);
@@ -126,10 +128,7 @@ export default function Agreements() {
   const [modal, setModal] = useState(null); // { mode, doc }
 
   const fetchDocs = useCallback(async () => {
-    if (!isAuthenticated) {
-      logout();
-      return;
-    }
+    if (requireSignedIn()) return;
     setLoading(true);
     try {
       const reqs = [api.get("/signatures/")];

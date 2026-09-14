@@ -8,6 +8,7 @@ import { Screen, Card, Button, Input, Select, ModalBackdrop } from "@/components
 import { toast } from "@/lib/toast";
 import { confirm } from "@/lib/confirm";
 import { colors } from "@/theme/colors";
+import { useAccessGuard } from "@/lib/accessGuard";
 
 // Port of frontend/src/pages/HabitTracker.jsx.
 //
@@ -437,6 +438,7 @@ function SuggestModal({ clientId, clientName, onClose, onAssigned }) {
 
 export default function HabitTracker() {
   const { isAuthenticated, isCoach, logout } = useAuth();
+  const { requireSignedIn } = useAccessGuard();
   const coach = isCoach();
 
   const [habits, setHabits] = useState([]);
@@ -484,10 +486,7 @@ export default function HabitTracker() {
   );
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      logout();
-      return;
-    }
+    if (requireSignedIn()) return;
     if (coach) {
       fetchClients();
       fetchHabits("");

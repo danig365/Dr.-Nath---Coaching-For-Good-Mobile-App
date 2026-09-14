@@ -6,6 +6,7 @@ import { api } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
 import { Screen, Card, Input } from "@/components/ui";
 import { colors } from "@/theme/colors";
+import { useAccessGuard } from "@/lib/accessGuard";
 
 // Port of frontend/src/pages/CoachClients.jsx.
 //
@@ -13,15 +14,13 @@ import { colors } from "@/theme/colors";
 // renders a four-column table; on a phone each client becomes a card.
 export default function CoachClients() {
   const { isAuthenticated, isCoach, logout } = useAuth();
+  const { requireCoach } = useAccessGuard();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
 
   useEffect(() => {
-    if (!isAuthenticated || !isCoach()) {
-      logout();
-      return;
-    }
+    if (requireCoach()) return;
     api
       .get("/clients/")
       .then((res) => setClients(Array.isArray(res.data) ? res.data : []))

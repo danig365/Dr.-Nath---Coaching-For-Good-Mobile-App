@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Screen, Card, Button, Input } from "@/components/ui";
 import { toast } from "@/lib/toast";
 import { colors } from "@/theme/colors";
+import { useAccessGuard } from "@/lib/accessGuard";
 
 // Combined port of frontend/src/pages/AddSkill.jsx and EditSkill.jsx.
 //
@@ -64,6 +65,7 @@ export default function SkillForm({ mode = "add" }) {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const { isAuthenticated, isCoach, logout } = useAuth();
+  const { requireCoach } = useAccessGuard();
 
   const [form, setForm] = useState({
     name: "",
@@ -80,10 +82,7 @@ export default function SkillForm({ mode = "add" }) {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated || !isCoach()) {
-      logout();
-      return;
-    }
+    if (requireCoach()) return;
     if (!isEdit) return;
 
     (async () => {

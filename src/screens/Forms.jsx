@@ -10,6 +10,7 @@ import { DateFilter } from "@/components/sessionUi";
 import { toast } from "@/lib/toast";
 import { confirm } from "@/lib/confirm";
 import { colors } from "@/theme/colors";
+import { useAccessGuard } from "@/lib/accessGuard";
 
 // Port of frontend/src/pages/Forms.jsx — the template builder plus assignment
 // and fill-in flows.
@@ -637,6 +638,7 @@ function FillModal({ assignment, onClose, onSubmitted }) {
 // ── Page ─────────────────────────────────────────────────────────────────────
 export default function Forms() {
   const { isAuthenticated, isCoach, logout } = useAuth();
+  const { requireSignedIn } = useAccessGuard();
   const coach = isCoach();
 
   const [tab, setTab] = useState("templates");
@@ -650,10 +652,7 @@ export default function Forms() {
   const [fillTarget, setFillTarget] = useState(null);
 
   const fetchAll = useCallback(async () => {
-    if (!isAuthenticated) {
-      logout();
-      return;
-    }
+    if (requireSignedIn()) return;
     setLoading(true);
     try {
       if (coach) {

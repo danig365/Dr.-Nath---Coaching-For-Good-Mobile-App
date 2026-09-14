@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Screen, Card, Button } from "@/components/ui";
 import { toast } from "@/lib/toast";
 import { colors } from "@/theme/colors";
+import { useAccessGuard } from "@/lib/accessGuard";
 
 // Port of frontend/src/pages/MySkills.jsx — the coach's offerings.
 
@@ -165,16 +166,14 @@ function ConfirmModal({ message, onConfirm, onCancel }) {
 export default function MySkills() {
   const router = useRouter();
   const { isAuthenticated, isCoach, logout } = useAuth();
+  const { requireCoach } = useAccessGuard();
 
   const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const fetchSkills = useCallback(async () => {
-    if (!isAuthenticated || !isCoach()) {
-      logout();
-      return;
-    }
+    if (requireCoach()) return;
     setLoading(true);
     try {
       const res = await api.get("/skills/");
