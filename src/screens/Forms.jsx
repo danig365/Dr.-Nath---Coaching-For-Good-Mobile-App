@@ -38,7 +38,7 @@ function renderAnswer(q, a) {
     return "—";
   if (q.type === "multi_choice") return Array.isArray(a) ? a.join(", ") : String(a);
   if (q.type === "yes_no") return a === true || a === "true" ? "Yes" : "No";
-  if (q.type === "rating") return `${a} / 5`;
+  if (q.type === "rating") return `${a} / ${q.max || 5}`;
   return String(a);
 }
 
@@ -410,6 +410,10 @@ function ResponsesModal({ assignment, onClose }) {
                 <Text className="font-sans-semibold text-sm text-navy">
                   {i + 1}. {q.label}
                 </Text>
+
+                {q.help ? (
+                  <Text className="mb-1.5 font-sans text-xs text-slate">{q.help}</Text>
+                ) : null}
                 <Text className="mt-0.5 font-sans text-sm text-slate">
                   {renderAnswer(q, assignment.answers?.[q.id])}
                 </Text>
@@ -494,6 +498,10 @@ function FillModal({ assignment, onClose, onSubmitted }) {
                   {q.required ? <Text className="text-red-700"> *</Text> : null}
                 </Text>
 
+                {q.help ? (
+                  <Text className="mb-1.5 font-sans text-xs text-slate">{q.help}</Text>
+                ) : null}
+
                 {q.type === "short_text" ? (
                   <TextInput
                     value={answers[q.id] || ""}
@@ -549,8 +557,10 @@ function FillModal({ assignment, onClose, onSubmitted }) {
                 ) : null}
 
                 {q.type === "rating" ? (
-                  <View className="flex-row gap-2">
-                    {[1, 2, 3, 4, 5].map((n) => (
+                  // A scale as long as the question asks for — Dr Nath's intake
+                  // form uses 1-10. Wraps, since ten circles don't fit a row.
+                  <View className="flex-row flex-wrap gap-2">
+                    {Array.from({ length: q.max || 5 }, (_, i) => i + 1).map((n) => (
                       <Pressable
                         key={n}
                         onPress={() => set(q.id, n)}

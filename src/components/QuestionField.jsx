@@ -97,9 +97,11 @@ export default function QuestionField({ q, value, onChange }) {
   }
 
   if (q.type === "rating") {
+    // A scale as long as the question asks for — Dr Nath's intake form uses
+    // 1-10. Wraps, since ten circles don't fit a phone row.
     return (
-      <View className="flex-row gap-1.5">
-        {[1, 2, 3, 4, 5].map((n) => (
+      <View className="flex-row flex-wrap gap-1.5">
+        {Array.from({ length: q.max || 5 }, (_, i) => i + 1).map((n) => (
           <Pressable
             key={n}
             onPress={() => onChange(n)}
