@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { View, Text, Pressable, Modal, Animated, Easing } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 
@@ -24,7 +25,11 @@ import { colors } from "@/theme/colors";
 //
 // `floating` overlays the bar on the content below (the landing hero, which
 // runs edge to edge beneath it); without it the bar sits in normal flow.
-export default function GuestHeader({ onJump, floating = false }) {
+// Height of the contact strip, exported so the landing hero can offset its
+// photo by the real navbar height rather than a number that silently drifts.
+export const CONTACT_STRIP_HEIGHT = 33;
+
+export default function GuestHeader({ onJump, floating = false, contact = false }) {
   const router = useRouter();
   const { isAuthenticated, role } = useAuth();
   const [open, setOpen] = useState(false);
@@ -110,6 +115,22 @@ export default function GuestHeader({ onJump, floating = false }) {
             backgroundColor: "#ECE0BE",
           }}
         />
+        {/* Contact strip, mirroring the web navbar: the number a prospective
+            client should see before anything else. */}
+        {contact ? (
+          <Pressable
+            onPress={() => Linking.openURL("tel:+33751367096")}
+            accessibilityRole="link"
+            accessibilityLabel="Call +33 7 51 36 70 96"
+            className="flex-row items-center justify-center gap-2 bg-navy px-5 py-2"
+          >
+            <Feather name="phone" size={13} color={colors.gold} />
+            <Text className="font-sans-semibold text-[13px] tracking-wide text-hero-cream">
+              +33 7 51 36 70 96
+            </Text>
+          </Pressable>
+        ) : null}
+
         <View className="flex-row items-center justify-between px-5 py-2">
           <Pressable onPress={() => goSection("top")}>
             <Image

@@ -10,7 +10,7 @@ import { publicApi } from "@/api/client";
 import { useAuth } from "@/context/AuthContext";
 import { homeHrefFor } from "@/lib/appMenu";
 import { Button } from "@/components/ui";
-import GuestHeader from "@/components/GuestHeader";
+import GuestHeader, { CONTACT_STRIP_HEIGHT } from "@/components/GuestHeader";
 import StatsTicker from "@/components/landing/StatsTicker";
 import NewsletterBand from "@/components/landing/NewsletterBand";
 import Testimonials from "@/components/landing/Testimonials";
@@ -194,8 +194,11 @@ export default function Landing() {
   const appHref = homeHrefFor(role);
   const joinHref = isAuthenticated ? appHref : "/register";
   // The guest navbar floats over the hero (GuestHeader is absolutely
-  // positioned): safe-area inset + py-2 + a 72pt logo.
-  const headerHeight = insets.top + 88;
+  // positioned), so the photo starts below it: safe-area inset + the contact
+  // strip (py-2 + 13pt line) + py-2 + a 72pt logo. Keep this in step with
+  // GuestHeader — if the bar grows and this doesn't, the photo slides back up
+  // behind it and crops her face again.
+  const headerHeight = insets.top + 88 + CONTACT_STRIP_HEIGHT;
   const scrollRef = useRef(null);
   const offsets = useRef({ top: 0, who: 0, offerings: 0, newsletter: 0 });
   const [showProfile, setShowProfile] = useState(false);
@@ -220,7 +223,7 @@ export default function Landing() {
 
   return (
     <View className="flex-1 bg-cream">
-      <GuestHeader onJump={jump} floating />
+      <GuestHeader onJump={jump} floating contact />
 
       <ScrollView ref={scrollRef} contentContainerClassName="pb-0">
         {/* ── HERO ── */}
