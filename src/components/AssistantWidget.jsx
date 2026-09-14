@@ -21,8 +21,13 @@ import { colors } from "@/theme/colors";
 const GREETING = {
   role: "assistant",
   content:
-    "Hi! 👋 I'm the Dr. Nath assistant. Ask me about coaching, how booking works, or finding the right coach.",
+    "Hi! 👋 I'm Nathion, Dr. Nath's virtual assistant. Ask me about coaching, how booking works, or finding the right coach.",
 };
+
+// What Nathion says unprompted on the landing page — the web widget does the
+// same on the marketing home.
+const NUDGE = "Thank you for landing on our webpage — how may I assist you?";
+const NUDGE_DELAY_MS = 3500;
 
 const SUGGESTIONS = [
   "How do I book a session?",
@@ -63,7 +68,21 @@ export default function AssistantWidget() {
   const [messages, setMessages] = useState([GREETING]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [nudge, setNudge] = useState(false);
   const scrollRef = useRef(null);
+  const nudgeShownRef = useRef(false);
+
+  // Greet someone browsing the landing page, as Dr Nath asked. Once per app
+  // run, and never over an already-open chat.
+  const onLanding = pathname === "/landing";
+  useEffect(() => {
+    if (!onLanding || open || nudgeShownRef.current) return;
+    const t = setTimeout(() => {
+      nudgeShownRef.current = true;
+      setNudge(true);
+    }, NUDGE_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [onLanding, open]);
 
   useEffect(() => {
     if (open) scrollRef.current?.scrollToEnd({ animated: true });
@@ -100,9 +119,42 @@ export default function AssistantWidget() {
 
   return (
     <>
+      {/* Nathion's opening line, beside the launcher */}
+      {nudge && !open ? (
+        <View
+          className="absolute max-w-[260px] rounded-2xl border border-gold/30 bg-white px-4 py-3"
+          style={{ bottom: insets.bottom + 92, right: 24 }}
+        >
+          <Pressable
+            onPress={() => setNudge(false)}
+            hitSlop={8}
+            accessibilityLabel="Dismiss"
+            className="absolute -right-2 -top-2 h-6 w-6 items-center justify-center rounded-full bg-navy"
+          >
+            <Feather name="x" size={12} color={colors.gold} />
+          </Pressable>
+          <Text className="text-[11px] font-sans-bold uppercase tracking-wider text-gold-deep">
+            Nathion
+          </Text>
+          <Pressable
+            onPress={() => {
+              setNudge(false);
+              setOpen(true);
+            }}
+          >
+            <Text className="mt-0.5 font-sans text-sm leading-snug text-navy-deep">
+              {NUDGE}
+            </Text>
+          </Pressable>
+        </View>
+      ) : null}
+
       {/* Floating button */}
       <Pressable
-        onPress={() => setOpen(true)}
+        onPress={() => {
+          setNudge(false);
+          setOpen(true);
+        }}
         accessibilityLabel="Open assistant"
         className="absolute h-14 w-14 items-center justify-center rounded-full border-2 border-gold bg-navy"
         style={{ bottom: insets.bottom + 24, right: 24 }}
@@ -156,9 +208,7 @@ export default function AssistantWidget() {
                   />
                 </View>
                 <View className="min-w-0 flex-1">
-                  <Text className="font-sans-bold text-sm text-cream">
-                    Dr. Nath Assistant
-                  </Text>
+                  <Text className="font-sans-bold text-sm text-cream">Nathion</Text>
                   <Text className="text-[11px] text-slate-light">
                     Here to help you get started
                   </Text>
