@@ -202,6 +202,16 @@ export default function SessionCall() {
       api.post(`/bookings/${bookingId}/mark-joined/`).catch(() => {});
       startTimer();
     } catch (err) {
+      // The token is refused while our admission isn't current (e.g. a stale
+      // 'admitted' from an earlier attempt was just reset by request-join).
+      // That's "not yet", not a failure — go back to waiting for the coach.
+      if (
+        err?.response?.status === 403 &&
+        err?.response?.data?.admit_status !== undefined
+      ) {
+        setWaiting(true);
+        return;
+      }
       toast.error(err?.response?.data?.detail || "Couldn't join the session.");
     }
   }, [bookingId, connect, startTimer]);
