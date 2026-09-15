@@ -44,7 +44,12 @@ export function useCallRoom() {
     setLocalVideoRef(toTrackRef(lp, camPub, Track.Source.Camera));
   }, []);
 
+  // The server-side transcription worker joins every session room as an AGENT
+  // participant. It is not a person — no tile, no seat. Every screen that
+  // renders participants (1:1, group, guest) goes through this hook, so the
+  // one guard covers them all.
   const upsertParticipant = useCallback((p) => {
+    if (p?.isAgent) return;
     setParticipants((prev) => ({
       ...prev,
       [p.sid]: {
