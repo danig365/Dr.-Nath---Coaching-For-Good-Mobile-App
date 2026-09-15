@@ -19,8 +19,15 @@ import { AudioSession } from "@livekit/react-native";
 const toTrackRef = (participant, publication, source) =>
   publication ? { participant, publication, source } : undefined;
 
-export function useCallRoom() {
+/**
+ * @param {{ onData?: (msg: object) => void }} [options]
+ *   onData receives each JSON data message another participant publishes.
+ */
+export function useCallRoom({ onData } = {}) {
   const roomRef = useRef(null);
+  // Kept in a ref so a new handler each render doesn't need a reconnect.
+  const onDataRef = useRef(onData);
+  onDataRef.current = onData;
   const joiningRef = useRef(false);
 
   const [state, setState] = useState("idle"); // idle | connecting | connected | ended
@@ -118,6 +125,14 @@ export function useCallRoom() {
           .on(RoomEvent.TrackUnsubscribed, (_t, _pub, participant) =>
             upsertParticipant(participant)
           )
+          .on(RoomEvent.DataReceived, (payload) => {
+            try {
+              const msg = JSON.parse(new TextDecoder().decode(payload));
+              if (msg && typeof msg === "object") onDataRef.current?.(msg);
+            } catch {
+              /* ignore non-JSON data */
+            }
+          })
           .on(RoomEvent.LocalTrackPublished, refreshLocal)
           .on(RoomEvent.LocalTrackUnpublished, refreshLocal)
           .on(RoomEvent.ConnectionQualityChanged, (quality, participant) => {

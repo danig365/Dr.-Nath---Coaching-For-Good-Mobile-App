@@ -8,7 +8,9 @@ import { api } from "@/api/client";
 // Token for a 1:1 session call.
 export async function getBookingCallToken(bookingId) {
   const res = await api.get(`/bookings/livekit/token/booking/${bookingId}/`);
-  // { url, token, room, identity, server_transcription }
+  // { url, token, room, identity, server_transcription, ai_notes_enabled }
+  // `ai_notes_enabled` false means a participant switched AI notes off for
+  // this session.
   // `server_transcription` true means the backend worker transcribes the call,
   // so the client must not open its own microphone capture to do it too.
   return res.data;

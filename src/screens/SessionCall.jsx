@@ -28,7 +28,8 @@ import { colors } from "@/theme/colors";
 //   • Browser speech-to-text AI notes — the web already disables these on mobile
 //     devices via its own user-agent check, so there is nothing to port. When
 //     TRANSCRIPTION_ENABLED is on, the server-side worker produces the
-//     transcript from the LiveKit stream for every platform.
+//     transcript from the LiveKit stream for every platform — so the notice and
+//     the on/off switch for it ARE ported, as they are on web.
 
 const fmtClock = (secs) => {
   if (secs == null) return "--:--";
@@ -57,7 +58,21 @@ export default function SessionCall() {
     toggleMic,
     toggleCam,
     retryMedia,
-  } = useCallRoom();
+    publishData,
+  } = useCallRoom({
+    onData: (msg) => {
+      // The other participant switched AI notes on or off.
+      if (msg.t === "ainotes" && typeof msg.enabled === "boolean") {
+        setAiNotesOn(msg.enabled);
+        setNotesBanner(false);
+        toast.info(
+          msg.enabled
+            ? `${msg.by || "The other participant"} turned AI note-taking back on.`
+            : `${msg.by || "The other participant"} turned AI note-taking off — nothing from this session will be kept.`
+        );
+      }
+    },
+  });
 
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -70,6 +85,10 @@ export default function SessionCall() {
   const [pendingJoin, setPendingJoin] = useState(null); // coach: client waiting
   const [admitBusy, setAdmitBusy] = useState(false);
   const [endConfirm, setEndConfirm] = useState(false);
+  // AI notes: only offered when the server worker transcribes this call.
+  const [notesAvailable, setNotesAvailable] = useState(false);
+  const [aiNotesOn, setAiNotesOn] = useState(true);
+  const [notesBanner, setNotesBanner] = useState(true);
 
   const durationRef = useRef(0);
   const scheduledEndRef = useRef(null);
@@ -198,6 +217,8 @@ export default function SessionCall() {
   const doConnect = useCallback(async () => {
     try {
       const creds = await getBookingCallToken(bookingId);
+      setNotesAvailable(!!creds.server_transcription);
+      if (creds.ai_notes_enabled === false) setAiNotesOn(false);
       await connect(creds);
       api.post(`/bookings/${bookingId}/mark-joined/`).catch(() => {});
       startTimer();
@@ -261,13 +282,43 @@ export default function SessionCall() {
     const t = setInterval(async () => {
       try {
         const res = await api.get(`/bookings/${bookingId}/pending-joins/`);
-        setPendingJoin(res.data?.pending ? res.data : null);
+        // The endpoint answers { waiting, client_name }.
+        setPendingJoin(res.data?.waiting ? { name: res.data.client_name } : null);
       } catch {
         /* noop */
       }
     }, 4000);
     return () => clearInterval(t);
   }, [host, state, bookingId]);
+
+  // Switch AI notes for the whole session: stored on the booking (the server
+  // worker stops keeping anything) and broadcast so the other side's screen
+  // matches straight away. Same behaviour as the web call page.
+  const setAiNotes = (enabled) => {
+    setAiNotesOn(enabled);
+    setNotesBanner(false);
+    api
+      .post(`/bookings/${bookingId}/ai-notes/`, { enabled })
+      .then(() =>
+        toast.info(
+          enabled
+            ? "AI note-taking is back on."
+            : "AI note-taking is off — no transcript or summary will be kept for this session."
+        )
+      )
+      .catch(() => {
+        setAiNotesOn(!enabled);
+        toast.error("Couldn't change AI note-taking. Please try again.");
+      });
+    publishData({ t: "ainotes", enabled, by: host ? "Coach" : "Client" });
+  };
+
+  // Hide the notice by itself after a few seconds, as on web.
+  useEffect(() => {
+    if (state !== "connected" || !notesBanner) return undefined;
+    const t = setTimeout(() => setNotesBanner(false), 9000);
+    return () => clearTimeout(t);
+  }, [state, notesBanner]);
 
   const handleAdmit = async () => {
     setAdmitBusy(true);
@@ -476,8 +527,32 @@ export default function SessionCall() {
         />
       </View>
 
+      {/* AI notes notice */}
+      {notesAvailable && aiNotesOn && notesBanner ? (
+        <View className="mx-4 mt-3 flex-row items-start gap-3 rounded-2xl border border-gold/35 bg-navy px-4 py-3">
+          <View className="h-8 w-8 items-center justify-center rounded-full bg-gold/15">
+            <Feather name="file-text" size={15} color={colors.gold} />
+          </View>
+          <View className="flex-1">
+            <Text className="font-sans-bold text-sm text-cream">AI note-taking is on</Text>
+            <Text className="mt-0.5 font-sans text-xs leading-5 text-slate-light">
+              This session is transcribed to create a private summary for you and your
+              coach. Either of you can turn it off.
+            </Text>
+            <View className="mt-2 flex-row items-center gap-4">
+              <Pressable onPress={() => setNotesBanner(false)} className="rounded-full bg-gold px-3 py-1">
+                <Text className="font-sans-bold text-xs text-navy-deep">Got it</Text>
+              </Pressable>
+              <Pressable onPress={() => setAiNotes(false)} hitSlop={8}>
+                <Text className="font-sans-semibold text-xs text-slate-light">Turn off</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      ) : null}
+
       {/* Controls */}
-      <View className="flex-row items-center justify-center gap-6 px-4 py-5">
+      <View className="flex-row items-center justify-center gap-3 px-3 py-5">
         <Pressable
           onPress={toggleMic}
           className={`h-14 w-14 items-center justify-center rounded-full ${
@@ -503,6 +578,22 @@ export default function SessionCall() {
             color={camOn ? colors.cream : colors.navyDeep}
           />
         </Pressable>
+
+        {notesAvailable ? (
+          <Pressable
+            onPress={() => setAiNotes(!aiNotesOn)}
+            accessibilityLabel={aiNotesOn ? "Turn AI note-taking off" : "Turn AI note-taking on"}
+            className={`h-14 w-14 items-center justify-center rounded-full ${
+              aiNotesOn ? "bg-gold" : "bg-white/15"
+            }`}
+          >
+            <Feather
+              name="file-text"
+              size={22}
+              color={aiNotesOn ? colors.navyDeep : colors.cream}
+            />
+          </Pressable>
+        ) : null}
 
         <Pressable
           onPress={() => router.push(`/chat/${bookingId}`)}
