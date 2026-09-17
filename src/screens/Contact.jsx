@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable, Linking } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
@@ -57,6 +57,14 @@ export default function Contact() {
           Questions about coaching, programmes or bookings? Send a message and you'll get a
           reply by email.
         </Text>
+        <Pressable
+          onPress={() => Linking.openURL("mailto:query@dr-nath.com")}
+          accessibilityRole="link"
+          className="mt-3 flex-row items-center gap-1.5"
+        >
+          <Feather name="mail" size={14} color={colors.goldDeep} />
+          <Text className="font-sans-semibold text-sm text-gold-deep">query@dr-nath.com</Text>
+        </Pressable>
       </View>
 
       {sent ? (

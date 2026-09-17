@@ -118,17 +118,30 @@ export default function GuestHeader({ onJump, floating = false, contact = false 
         {/* Contact strip, mirroring the web navbar: the number a prospective
             client should see before anything else. */}
         {contact ? (
-          <Pressable
-            onPress={() => Linking.openURL("tel:+33751367096")}
-            accessibilityRole="link"
-            accessibilityLabel="Call +33 7 51 36 70 96"
-            className="flex-row items-center justify-center gap-2 bg-navy px-5 py-2"
-          >
-            <Feather name="phone" size={13} color={colors.gold} />
-            <Text className="font-sans-semibold text-[13px] tracking-wide text-hero-cream">
-              +33 7 51 36 70 96
-            </Text>
-          </Pressable>
+          <View className="flex-row items-center justify-center gap-5 bg-navy px-4 py-2">
+            <Pressable
+              onPress={() => Linking.openURL("mailto:query@dr-nath.com")}
+              accessibilityRole="link"
+              accessibilityLabel="Email query@dr-nath.com"
+              className="flex-row items-center gap-1.5"
+            >
+              <Feather name="mail" size={13} color={colors.gold} />
+              <Text className="font-sans-semibold text-[12px] tracking-wide text-hero-cream">
+                query@dr-nath.com
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => Linking.openURL("tel:+33751367096")}
+              accessibilityRole="link"
+              accessibilityLabel="Call +33 7 51 36 70 96"
+              className="flex-row items-center gap-1.5"
+            >
+              <Feather name="phone" size={13} color={colors.gold} />
+              <Text className="font-sans-semibold text-[12px] tracking-wide text-hero-cream">
+                +33 7 51 36 70 96
+              </Text>
+            </Pressable>
+          </View>
         ) : null}
 
         <View className="flex-row items-center justify-between px-5 py-2">
