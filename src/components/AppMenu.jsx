@@ -98,7 +98,7 @@ const CLIENT_GROUPS = [
     label: "Workspace",
     items: [
       // Agreements and Forms are sub-tabs of the Resources screen, as on web.
-      { icon: "folder", label: "Resources", href: "/(client)/resources" },
+      { icon: "folder", label: "Resources", href: "/(client)/resources", badge: "resources" },
       { icon: "target", label: "Milestones", href: "/milestones" },
       { icon: "activity", label: "Habits", href: "/habits" },
     ],
@@ -129,6 +129,10 @@ export default function AppMenu() {
 
   const [mounted, setMounted] = useState(false);
   const [upcoming, setUpcoming] = useState(0);
+  // Resources a coach has shared since this client last opened the page. Unlike
+  // the sessions badge this is polled without opening the sheet, so the Menu
+  // button itself can show that something new is waiting.
+  const [newResources, setNewResources] = useState(0);
   const fetched = useRef(false);
   const anim = useRef(new Animated.Value(0)).current;
 
@@ -145,6 +149,18 @@ export default function AppMenu() {
       setUpcoming(0);
     }
   }, []);
+
+  useEffect(() => {
+    if (!visible || isCoach) { setNewResources(0); return undefined; }
+    let alive = true;
+    const load = () =>
+      api.get("/resources/unread/")
+        .then((res) => { if (alive) setNewResources(res.data?.count || 0); })
+        .catch(() => {});
+    load();                       // also re-runs on navigation, so visiting
+    const id = setInterval(load, 60000);  // Resources clears it right away
+    return () => { alive = false; clearInterval(id); };
+  }, [visible, isCoach, pathname]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -204,6 +220,15 @@ export default function AppMenu() {
       >
         <Feather name="menu" size={16} color={colors.gold} />
         <Text className="font-sans-bold text-sm text-cream">Menu</Text>
+        {/* Something new is inside — the sheet is closed, so the button carries
+            the signal the way the web navbar's badge does. */}
+        {newResources > 0 ? (
+          <View className="absolute -right-1 -top-1 min-w-[20px] items-center rounded-full bg-gold px-1.5 py-0.5">
+            <Text className="font-sans-bold text-[11px] text-navy-deep">
+              {newResources > 99 ? "99+" : newResources}
+            </Text>
+          </View>
+        ) : null}
       </Pressable>
 
       <Modal
@@ -273,13 +298,19 @@ export default function AppMenu() {
                           {item.label}
                         </Text>
 
-                        {item.badge === "upcoming" && upcoming > 0 ? (
-                          <View className="rounded-full bg-gold px-2 py-0.5">
-                            <Text className="font-sans-bold text-xs text-navy-deep">
-                              {upcoming > 99 ? "99+" : upcoming}
-                            </Text>
-                          </View>
-                        ) : null}
+                        {(() => {
+                          const count =
+                            item.badge === "upcoming" ? upcoming
+                              : item.badge === "resources" ? newResources
+                                : 0;
+                          return count > 0 ? (
+                            <View className="rounded-full bg-gold px-2 py-0.5">
+                              <Text className="font-sans-bold text-xs text-navy-deep">
+                                {count > 99 ? "99+" : count}
+                              </Text>
+                            </View>
+                          ) : null;
+                        })()}
                       </Pressable>
                     );
                   })}

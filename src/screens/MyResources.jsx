@@ -89,6 +89,7 @@ export default function MyResources() {
   const { requireSignedIn } = useAccessGuard();
 
   const [resources, setResources] = useState([]);
+  const [newSince, setNewSince] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [coaches, setCoaches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -100,11 +101,18 @@ export default function MyResources() {
     if (requireSignedIn()) return;
     setLoading(true);
     try {
-      const [shared, subs, cs] = await Promise.all([
+      const [shared, subs, cs, unread] = await Promise.all([
         api.get("/resources/shared/"),
         api.get("/resources/submissions/"),
         api.get("/resources/submissions/coaches/"),
+        api.get("/resources/unread/").catch(() => null),
       ]);
+      // Opening the page is what "seen" means. Read the cut-off first so the
+      // NEW chips outlive the visit that clears the menu badge.
+      if (unread?.data?.count > 0) {
+        setNewSince(unread.data.since ? new Date(unread.data.since).getTime() : 0);
+        api.post("/resources/mark-seen/").catch(() => {});
+      }
       setResources(shared.data);
       setSubmissions(subs.data);
       setCoaches(cs.data);
@@ -275,12 +283,22 @@ export default function MyResources() {
                             color={colors.gold}
                           />
                           <View className="min-w-0 flex-1">
-                            <Text
-                              className="font-sans-semibold text-navy"
-                              numberOfLines={1}
-                            >
-                              {r.title}
-                            </Text>
+                            <View className="flex-row items-center gap-2">
+                              <Text
+                                className="shrink font-sans-semibold text-navy"
+                                numberOfLines={1}
+                              >
+                                {r.title}
+                              </Text>
+                              {newSince !== null &&
+                              new Date(r.created_at).getTime() > newSince ? (
+                                <View className="rounded-full bg-gold px-1.5 py-0.5">
+                                  <Text className="font-sans-bold text-[10px] text-navy-deep">
+                                    NEW
+                                  </Text>
+                                </View>
+                              ) : null}
+                            </View>
                             {r.description ? (
                               <Text
                                 className="font-sans text-xs text-slate"
