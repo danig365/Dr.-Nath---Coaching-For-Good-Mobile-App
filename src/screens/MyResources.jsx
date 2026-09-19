@@ -10,6 +10,7 @@ import { toast } from "@/lib/toast";
 import { downloadResource, downloadSubmission } from "@/lib/download";
 import { pickFile, appendFile } from "@/lib/filePicker";
 import { colors } from "@/theme/colors";
+import { useAccessGuard } from "@/lib/accessGuard";
 
 // Port of frontend/src/pages/MyResources.jsx — the client's view of resources
 // shared by their coach, plus the upload inbox back to the coach.
@@ -85,6 +86,7 @@ function ChipPicker({ options, value, onChange, emptyLabel = "— None —", all
 
 export default function MyResources() {
   const { isAuthenticated, logout } = useAuth();
+  const { requireSignedIn } = useAccessGuard();
 
   const [resources, setResources] = useState([]);
   const [submissions, setSubmissions] = useState([]);
@@ -95,11 +97,7 @@ export default function MyResources() {
   const [uploading, setUploading] = useState(false);
 
   const fetchAll = useCallback(async () => {
-    if (!isAuthenticated) {
-      toast.error("Please log in.");
-      logout();
-      return;
-    }
+    if (requireSignedIn()) return;
     setLoading(true);
     try {
       const [shared, subs, cs] = await Promise.all([
@@ -118,7 +116,7 @@ export default function MyResources() {
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated, logout]);
+  }, [logout, requireSignedIn]);
 
   useEffect(() => {
     fetchAll();

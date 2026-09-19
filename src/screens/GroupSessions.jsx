@@ -9,6 +9,7 @@ import { Screen, Card, Button } from "@/components/ui";
 import PaymentForm from "@/components/PaymentForm";
 import { toast } from "@/lib/toast";
 import { colors } from "@/theme/colors";
+import { useAccessGuard } from "@/lib/accessGuard";
 
 // Port of frontend/src/pages/GroupSessions.jsx — the client-facing catalogue of
 // bookable group sessions.
@@ -226,6 +227,7 @@ function SessionCard({ session, onReserve, reserved, router }) {
 export default function GroupSessions() {
   const router = useRouter();
   const { isAuthenticated, logout } = useAuth();
+  const { requireSignedIn } = useAccessGuard();
 
   const [sessions, setSessions] = useState([]);
   const [reservedIds, setReservedIds] = useState(new Set());
@@ -233,11 +235,7 @@ export default function GroupSessions() {
   const [checkout, setCheckout] = useState(null);
 
   const fetchSessions = useCallback(async () => {
-    if (!isAuthenticated) {
-      toast.error("Please log in to view group sessions.");
-      logout();
-      return;
-    }
+    if (requireSignedIn()) return;
     setLoading(true);
     try {
       const [res, mine] = await Promise.all([
@@ -259,7 +257,7 @@ export default function GroupSessions() {
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated, logout]);
+  }, [logout, requireSignedIn]);
 
   useEffect(() => {
     fetchSessions();
