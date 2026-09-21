@@ -394,9 +394,16 @@ export default function BookSessionPage() {
     if (match) {
       setSelectedSlot(match);
     } else {
+      // Ask the server WHY it isn't listed — too soon, already booked, held by
+      // someone else — as on web.
       setSlotNotice(
         "The time from your invite link is no longer available — please pick another below."
       );
+      api.get(`/bookings/slots/${requestedSlotId}/bookable/`)
+        .then((res) => {
+          if (res.data?.reason) setSlotNotice(`${res.data.reason} Please pick another time below.`);
+        })
+        .catch(() => {});
     }
     autoSelectedRef.current = true;
   }, [requestedSlotId, slots, slotsLoading]);
