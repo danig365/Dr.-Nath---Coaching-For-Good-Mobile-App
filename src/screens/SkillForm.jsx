@@ -77,6 +77,8 @@ export default function SkillForm({ mode = "add" }) {
     currentTag: "",
     is_chemistry: false,
     duration_minutes: 60,
+    max_total_bookings: "",
+    max_bookings_per_client: "",
   });
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
@@ -99,6 +101,9 @@ export default function SkillForm({ mode = "add" }) {
           currentTag: "",
           is_chemistry: !!s.is_chemistry,
           duration_minutes: s.duration_minutes || 60,
+          max_total_bookings: s.max_total_bookings == null ? "" : String(s.max_total_bookings),
+          max_bookings_per_client:
+            s.max_bookings_per_client == null ? "" : String(s.max_bookings_per_client),
         });
       } catch {
         toast.error("Failed to load skill.");
@@ -134,6 +139,13 @@ export default function SkillForm({ mode = "add" }) {
         tags: form.tags,
         is_chemistry: form.is_chemistry,
         duration_minutes: Number(form.duration_minutes) || 60,
+        // Blank means no limit, which the API stores as null.
+        max_total_bookings:
+          String(form.max_total_bookings).trim() === "" ? null : Number(form.max_total_bookings),
+        max_bookings_per_client:
+          String(form.max_bookings_per_client).trim() === ""
+            ? null
+            : Number(form.max_bookings_per_client),
       };
 
       if (isEdit) await api.patch(`/skills/${id}/`, payload);
@@ -321,6 +333,30 @@ export default function SkillForm({ mode = "add" }) {
               How long one session runs (e.g. 30 for a chemistry call, 60 for a full
               session).
             </Text>
+          </View>
+
+          {/* Limited allocation (optional) */}
+          <View className="rounded-xl border border-gold/20 bg-gold/5 p-4">
+            <FieldLabel icon="layers">Limit this offering (optional)</FieldLabel>
+            <Text className="mb-3 font-sans text-xs text-slate-light">
+              For a fixed allocation — e.g. 20 free sessions for one clinic's patients, no
+              more than 4 each. Leave both blank for no limit.
+            </Text>
+            <Input
+              label="Total sessions offered"
+              value={String(form.max_total_bookings)}
+              onChangeText={(v) => set("max_total_bookings", v)}
+              keyboardType="numeric"
+              placeholder="No limit"
+            />
+            <Input
+              label="Maximum per client"
+              value={String(form.max_bookings_per_client)}
+              onChangeText={(v) => set("max_bookings_per_client", v)}
+              keyboardType="numeric"
+              placeholder="No limit"
+              className="mb-0"
+            />
           </View>
 
           {/* Chemistry session toggle */}
