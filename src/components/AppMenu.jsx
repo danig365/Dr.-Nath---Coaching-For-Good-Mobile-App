@@ -41,6 +41,7 @@ const COACH_GROUPS = [
     label: "Clients",
     items: [
       { icon: "user-check", label: "My Clients", href: "/(coach)/clients" },
+      { icon: "briefcase", label: "Partner Organisations", href: "/(coach)/partner-codes" },
       { icon: "compass", label: "Coaches", href: "/coaches" },
     ],
   },

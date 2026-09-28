@@ -24,6 +24,7 @@ export default function CoachLayout() {
         <Stack.Screen name="skills" options={{ title: "My Skills" }} />
         <Stack.Screen name="sessions" options={{ title: "My Sessions" }} />
         <Stack.Screen name="clients" options={{ title: "My Clients" }} />
+        <Stack.Screen name="partner-codes" options={{ title: "Partner Organisations" }} />
         <Stack.Screen name="availability" options={{ title: "My Availability" }} />
         <Stack.Screen name="resources" options={{ title: "Resources" }} />
         <Stack.Screen name="agreements" options={{ title: "Agreements" }} />

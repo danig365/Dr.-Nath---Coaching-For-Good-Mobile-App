@@ -1,0 +1,186 @@
+import { useCallback, useEffect, useState } from "react";
+import { View, Text, Pressable, Modal, Share } from "react-native";
+import Feather from "@expo/vector-icons/Feather";
+
+import { api } from "@/api/client";
+import { Screen, Card } from "@/components/ui";
+import ModalBackdrop from "@/components/ui/ModalBackdrop";
+import { useAccessGuard } from "@/lib/accessGuard";
+import { toast } from "@/lib/toast";
+import { colors } from "@/theme/colors";
+
+// Partner organisations (October Health Month), mirroring
+// frontend/src/pages/PartnerCodes.jsx — each practice's code, how much of its
+// allocation is used, and its anonymised report.
+//
+// Read-only here on purpose: creating and editing a code is a long form with
+// dates and an offering picker, and it is done once per practice at a desk. The
+// website carries that; the phone carries the numbers she wants to glance at.
+
+const Stat = ({ label, value, tone }) => (
+  <View className="flex-1 rounded-xl border border-gold/15 bg-cream px-2 py-2.5">
+    <Text className="text-center font-sans-bold text-base" style={{ color: tone || colors.navy }}>
+      {value}
+    </Text>
+    <Text className="text-center font-sans text-[10px] uppercase tracking-wider text-slate-light">
+      {label}
+    </Text>
+  </View>
+);
+
+export default function PartnerCodes() {
+  const { requireCoach } = useAccessGuard();
+  const [codes, setCodes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [report, setReport] = useState(null);
+
+  const load = useCallback(async () => {
+    if (requireCoach()) return;
+    setLoading(true);
+    try {
+      const res = await api.get("/participation-codes/");
+      setCodes(Array.isArray(res.data) ? res.data : res.data.results || []);
+    } catch {
+      toast.error("Couldn't load participation codes.");
+    } finally {
+      setLoading(false);
+    }
+  }, [requireCoach]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const openReport = async (c) => {
+    try {
+      const res = await api.get(`/participation-codes/${c.id}/report/`);
+      setReport(res.data);
+    } catch {
+      toast.error("Couldn't load the report.");
+    }
+  };
+
+  if (loading) return <Screen loading />;
+
+  return (
+    <Screen>
+      <Text className="mb-1 font-display text-3xl text-navy">Partner Organisations</Text>
+      <Text className="mb-6 font-sans text-sm text-slate">
+        A code per practice, each with its own allocation. Create and edit them on the website.
+      </Text>
+
+      {codes.length === 0 ? (
+        <Card className="items-center py-14">
+          <Feather name="briefcase" size={26} color={colors.slateLight} />
+          <Text className="mt-3 font-sans-semibold text-navy">No partner organisations yet</Text>
+          <Text className="mt-1 text-center font-sans text-sm text-slate">
+            Create a code on the website, then send it with your invitation.
+          </Text>
+        </Card>
+      ) : (
+        codes.map((c) => {
+          const used = c.sessions_used || 0;
+          const pct = c.total_sessions
+            ? Math.min(100, Math.round((used / c.total_sessions) * 100))
+            : 0;
+          return (
+            <Card key={c.id} className="mb-3" style={{ opacity: c.active ? 1 : 0.65 }}>
+              <View className="flex-row items-start justify-between gap-3">
+                <View className="min-w-0 flex-1">
+                  <View className="flex-row items-center gap-2">
+                    <Text className="rounded-lg bg-gold/15 px-2 py-1 font-sans-bold text-sm tracking-wider text-gold-deep">
+                      {c.code}
+                    </Text>
+                    <Pressable
+                      onPress={() => Share.share({ message: c.code })}
+                      hitSlop={8}
+                      accessibilityLabel={`Share code ${c.code}`}
+                    >
+                      <Feather name="share-2" size={14} color={colors.slateLight} />
+                    </Pressable>
+                    {!c.active ? (
+                      <Text className="rounded-full bg-red-100 px-2 py-0.5 font-sans-semibold text-[10px] text-red-700">
+                        Inactive
+                      </Text>
+                    ) : null}
+                  </View>
+                  <Text className="mt-1.5 font-display text-lg text-navy">{c.organisation}</Text>
+                  <Text className="font-sans text-xs text-slate-light">
+                    {c.skill_name || "Any offering"}
+                    {c.valid_from && c.valid_until ? ` · ${c.valid_from} → ${c.valid_until}` : ""}
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => openReport(c)}
+                  className="flex-row items-center gap-1.5 rounded-full border border-gold/25 bg-gold/10 px-3 py-1.5"
+                >
+                  <Feather name="bar-chart-2" size={13} color={colors.goldDeep} />
+                  <Text className="font-sans-semibold text-xs text-gold-deep">Report</Text>
+                </Pressable>
+              </View>
+
+              <View className="mt-3 flex-row flex-wrap items-center gap-4">
+                <Text className="font-sans text-sm text-slate">
+                  {c.clients_registered} patient{c.clients_registered === 1 ? "" : "s"}
+                </Text>
+                <Text className="font-sans text-sm text-slate">max {c.max_per_client} each</Text>
+                <Text className="font-sans-semibold text-sm text-navy">
+                  {used} of {c.total_sessions} used
+                </Text>
+              </View>
+              <View className="mt-2 h-2 overflow-hidden rounded-full bg-navy/10">
+                <View
+                  className="h-full rounded-full"
+                  style={{ width: `${pct}%`, backgroundColor: pct >= 100 ? "#B91C1C" : colors.gold }}
+                />
+              </View>
+            </Card>
+          );
+        })
+      )}
+
+      <Modal visible={!!report} transparent animationType="fade" onRequestClose={() => setReport(null)}>
+        <ModalBackdrop>
+          <View className="w-full max-w-md rounded-2xl bg-white p-5">
+            <View className="mb-1 flex-row items-start justify-between">
+              <Text className="flex-1 font-display text-2xl text-navy">{report?.organisation}</Text>
+              <Pressable onPress={() => setReport(null)} hitSlop={8}>
+                <Feather name="x" size={20} color={colors.slateLight} />
+              </Pressable>
+            </View>
+            <Text className="mb-4 font-sans text-xs text-slate-light">
+              Code {report?.code}
+              {report?.window?.from ? ` · ${report.window.from} → ${report.window.until}` : ""}
+            </Text>
+
+            {report ? (
+              <>
+                <View className="mb-3 flex-row gap-2">
+                  <Stat label="Allocated" value={report.allocation.total} />
+                  <Stat label="Used" value={report.allocation.used} tone="#2E7D32" />
+                  <Stat label="Left" value={report.allocation.left} />
+                </View>
+                <View className="mb-3 flex-row gap-2">
+                  <Stat label="Patients" value={report.patients.registered} />
+                  <Stat label="Booked" value={report.patients.booked_at_least_one} />
+                  <Stat label="Avg each" value={report.patients.average_sessions_each} />
+                </View>
+                <View className="flex-row gap-2">
+                  <Stat label="Done" value={report.sessions.completed} tone="#2E7D32" />
+                  <Stat label="Upcoming" value={report.sessions.upcoming} />
+                  <Stat label="Cancelled" value={report.sessions.cancelled} />
+                  <Stat label="Missed" value={report.sessions.missed} tone="#B91C1C" />
+                </View>
+                <Text className="mt-4 font-sans text-xs leading-5 text-slate-light">
+                  Counts only — what a patient discusses in coaching is never shared with their
+                  practice. {report.patients.consented_to_share} of {report.patients.registered}{" "}
+                  patients agreed to be included in a summary shared with {report.organisation}.
+                </Text>
+              </>
+            ) : null}
+          </View>
+        </ModalBackdrop>
+      </Modal>
+    </Screen>
+  );
+}

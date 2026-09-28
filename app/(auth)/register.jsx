@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -163,6 +163,8 @@ export default function Register() {
     industries: [],
     organisation: "",
     job_title: "",
+    participation_code: "",
+    share_with_organisation: false,
   });
 
   const [formError, setFormError] = useState("");
@@ -263,6 +265,24 @@ export default function Register() {
       return null;
     }
   };
+
+  // Partner-organisation code (e.g. October Health Month): confirm it as it's
+  // typed and name the practice back, as on web.
+  const [codeState, setCodeState] = useState({ valid: null, detail: "" });
+  useEffect(() => {
+    const value = form.participation_code.trim();
+    if (!value) {
+      setCodeState({ valid: null, detail: "" });
+      return undefined;
+    }
+    const t = setTimeout(() => {
+      publicApi
+        .get(`/participation-code/check/?code=${encodeURIComponent(value)}`)
+        .then((res) => setCodeState({ valid: !!res.data.valid, detail: res.data.detail || "" }))
+        .catch(() => setCodeState({ valid: null, detail: "" }));
+    }, 400);
+    return () => clearTimeout(t);
+  }, [form.participation_code]);
 
   const handleSubmit = async () => {
     setFormError("");
@@ -579,6 +599,41 @@ export default function Register() {
                       value={form.job_title}
                       onChangeText={(v) => setField("job_title", v)}
                     />
+                    <Field
+                      label="Participation Code (Optional)"
+                      placeholder="From your doctor or organisation"
+                      value={form.participation_code}
+                      onChangeText={(v) => setField("participation_code", v.toUpperCase())}
+                      autoCapitalize="characters"
+                    />
+                    {codeState.detail ? (
+                      <Text
+                        className="-mt-2 mb-3 font-sans text-xs"
+                        style={{ color: codeState.valid ? "#7BC47F" : "#F8B4B4" }}
+                      >
+                        {codeState.detail}
+                      </Text>
+                    ) : null}
+                    {codeState.valid ? (
+                      <Pressable
+                        onPress={() => setField("share_with_organisation", !form.share_with_organisation)}
+                        className="mb-4 flex-row items-start gap-2"
+                      >
+                        <View
+                          className={`mt-0.5 h-4 w-4 items-center justify-center rounded border ${
+                            form.share_with_organisation ? "border-gold bg-gold" : "border-cream/40"
+                          }`}
+                        >
+                          {form.share_with_organisation ? (
+                            <Feather name="check" size={11} color={colors.navyDeep} />
+                          ) : null}
+                        </View>
+                        <Text className="flex-1 font-sans text-xs text-cream/75">
+                          I agree that my practice may be told I took part, as part of an anonymised
+                          summary. What I discuss in coaching is never shared.
+                        </Text>
+                      </Pressable>
+                    ) : null}
                   </>
                 )}
 
