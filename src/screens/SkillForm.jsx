@@ -79,6 +79,7 @@ export default function SkillForm({ mode = "add" }) {
     duration_minutes: 60,
     max_total_bookings: "",
     max_bookings_per_client: "",
+    requires_participation_code: false,
   });
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
@@ -104,6 +105,7 @@ export default function SkillForm({ mode = "add" }) {
           max_total_bookings: s.max_total_bookings == null ? "" : String(s.max_total_bookings),
           max_bookings_per_client:
             s.max_bookings_per_client == null ? "" : String(s.max_bookings_per_client),
+          requires_participation_code: !!s.requires_participation_code,
         });
       } catch {
         toast.error("Failed to load skill.");
@@ -146,6 +148,7 @@ export default function SkillForm({ mode = "add" }) {
           String(form.max_bookings_per_client).trim() === ""
             ? null
             : Number(form.max_bookings_per_client),
+        requires_participation_code: !!form.requires_participation_code,
       };
 
       if (isEdit) await api.patch(`/skills/${id}/`, payload);
@@ -334,6 +337,33 @@ export default function SkillForm({ mode = "add" }) {
               session).
             </Text>
           </View>
+
+          {/* Nominated patients only */}
+          <Pressable
+            onPress={() =>
+              set("requires_participation_code", !form.requires_participation_code)
+            }
+            className="flex-row items-start gap-3 rounded-xl border border-gold/20 bg-gold/5 p-4"
+          >
+            <View
+              className={`mt-0.5 h-5 w-5 items-center justify-center rounded border-2 ${
+                form.requires_participation_code ? "border-gold bg-gold" : "border-gold/40 bg-white"
+              }`}
+            >
+              {form.requires_participation_code ? (
+                <Feather name="check" size={12} color={colors.navyDeep} />
+              ) : null}
+            </View>
+            <View className="flex-1">
+              <Text className="font-sans-semibold text-sm text-navy">
+                Only for patients with a participation code
+              </Text>
+              <Text className="mt-0.5 font-sans text-xs text-slate-light">
+                For partner campaigns: only clients who registered with a code from a
+                participating organisation can book.
+              </Text>
+            </View>
+          </Pressable>
 
           {/* Limited allocation (optional) */}
           <View className="rounded-xl border border-gold/20 bg-gold/5 p-4">
