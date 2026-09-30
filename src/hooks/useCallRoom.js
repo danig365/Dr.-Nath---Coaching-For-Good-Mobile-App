@@ -157,14 +157,24 @@ export function useCallRoom({ onData } = {}) {
 
         // Publish according to intent; a failure here must not drop the call —
         // the user stays connected and can retry, matching the web behaviour.
+        // The two devices are acquired SEPARATELY: a camera another app is
+        // holding must not report the microphone as broken too.
+        const problems = [];
         try {
           await room.localParticipant.setMicrophoneEnabled(micWantRef.current);
-          await room.localParticipant.setCameraEnabled(camWantRef.current);
         } catch {
-          setMediaError(
-            "We couldn't turn on your camera/microphone. You're still connected — check the app's camera permission and tap Retry."
+          problems.push(
+            "We couldn't turn on your microphone. You're still connected — check the app's microphone permission and tap Retry."
           );
         }
+        try {
+          await room.localParticipant.setCameraEnabled(camWantRef.current);
+        } catch {
+          problems.push(
+            "We couldn't turn on your camera — another app may be using it. You're still connected; close that app and tap Retry."
+          );
+        }
+        if (problems.length) setMediaError(problems.join(" "));
 
         // Seed anyone already in the room.
         room.remoteParticipants.forEach(upsertParticipant);

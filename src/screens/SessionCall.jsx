@@ -237,16 +237,22 @@ export default function SessionCall() {
     }
   }, [bookingId, connect, startTimer]);
 
-  // Client: ask the coach to let them in, then poll until admitted.
+  // Client: ask the coach to let them in, then poll until admitted. Someone who
+  // has already been let into THIS session goes straight back in after a drop —
+  // the server answers 'admitted' and there is nothing to wait for.
   const requestJoin = useCallback(async () => {
     try {
       const res = await api.post(`/bookings/${bookingId}/request-join/`);
       setCoachPresent(!!res.data.coach_present);
+      if (res.data.status === "admitted") {
+        doConnect();
+        return;
+      }
       setWaiting(true);
     } catch (err) {
       toast.error(err?.response?.data?.detail || "Couldn't ask to join.");
     }
-  }, [bookingId]);
+  }, [bookingId, doConnect]);
 
   // While waiting for admission, poll until the coach admits (or denies) us.
   useEffect(() => {
