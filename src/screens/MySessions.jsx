@@ -305,8 +305,12 @@ function SessionCard({
               </>
             ) : null}
 
-            {/* Coach can correct any concluded session's outcome. */}
-            {["completed", "held_offline", "no_show", "not_held"].includes(session.status) ? (
+            {/* Coach records what happened: any finalised session, and one whose
+                booked time has passed but which the platform hasn't finalised
+                yet — a session held over the phone otherwise sat in Upcoming
+                with no way to mark it as having taken place. */}
+            {["completed", "held_offline", "no_show", "not_held"].includes(session.status) ||
+            (session.status === "accepted" && Date.now() >= sessionEndMs) ? (
               <OutcomeMenu
                 current={session.status}
                 onPick={(o) => onSetOutcome(session, o)}
