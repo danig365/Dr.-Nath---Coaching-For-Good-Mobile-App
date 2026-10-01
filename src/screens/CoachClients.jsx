@@ -35,7 +35,9 @@ export default function CoachClients() {
       (c) =>
         (c.name || "").toLowerCase().includes(q) ||
         (c.email || "").toLowerCase().includes(q) ||
-        (c.organisation || "").toLowerCase().includes(q)
+        (c.organisation || "").toLowerCase().includes(q) ||
+        (c.partner?.organisation || "").toLowerCase().includes(q) ||
+        (c.partner?.code || "").toLowerCase().includes(q)
     );
   }, [clients, query]);
 
@@ -56,7 +58,7 @@ export default function CoachClients() {
 
       <View className="mt-8">
         <Input
-          placeholder="Search by name, email or organisation…"
+          placeholder="Search by name, email, organisation or code…"
           value={query}
           onChangeText={setQuery}
           autoCapitalize="none"
@@ -86,7 +88,14 @@ export default function CoachClients() {
       ) : (
         <View className="gap-3">
           {filtered.map((c) => (
-            <Card key={c.user_id}>
+            <Card
+              key={c.user_id}
+              style={
+                c.partner
+                  ? { borderLeftWidth: 3, borderLeftColor: colors.gold }
+                  : undefined
+              }
+            >
               <View className="flex-row items-center gap-3">
                 <View className="h-9 w-9 items-center justify-center rounded-xl bg-gold">
                   <Text className="font-sans-bold text-sm text-navy-deep">
@@ -94,10 +103,21 @@ export default function CoachClients() {
                   </Text>
                 </View>
                 <View className="min-w-0 flex-1">
-                  <Text className="font-sans-semibold text-sm text-navy" numberOfLines={1}>
-                    {c.name}
-                  </Text>
-                  {c.organisation || c.job_title ? (
+                  <View className="flex-row items-center gap-2">
+                    <Text className="shrink font-sans-semibold text-sm text-navy" numberOfLines={1}>
+                      {c.name}
+                    </Text>
+                    {c.partner ? (
+                      <Text className="rounded-full border border-gold/35 bg-gold/15 px-1.5 py-0.5 font-sans-bold text-[10px] text-gold-deep">
+                        {c.partner.code}
+                      </Text>
+                    ) : null}
+                  </View>
+                  {c.partner ? (
+                    <Text className="font-sans text-xs text-gold-deep" numberOfLines={1}>
+                      via {c.partner.organisation}
+                    </Text>
+                  ) : c.organisation || c.job_title ? (
                     <Text className="font-sans text-xs text-slate" numberOfLines={1}>
                       {[c.job_title, c.organisation].filter(Boolean).join(" · ")}
                     </Text>
