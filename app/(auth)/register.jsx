@@ -402,6 +402,52 @@ export default function Register() {
           >
             {step === 0 && (
               <>
+                {/* The code comes first: someone arriving from a practice's
+                    invitation should see where it goes straight away, not find
+                    the box on the last step. */}
+                <View className="mb-4 rounded-xl border border-gold/25 bg-gold/10 p-3.5">
+                  <Field
+                    label="Participation Code (Optional)"
+                    placeholder="From your doctor or organisation"
+                    value={form.participation_code}
+                    onChangeText={(v) => setField("participation_code", v.toUpperCase())}
+                    autoCapitalize="characters"
+                    className="mb-0"
+                  />
+                  <Text
+                    className="mt-1.5 font-sans text-xs"
+                    style={{
+                      color: codeState.detail
+                        ? codeState.valid
+                          ? "#7BC47F"
+                          : "#F8B4B4"
+                        : "rgba(243,233,205,0.55)",
+                    }}
+                  >
+                    {codeState.detail || "Referred by a practice or company? Enter their code here."}
+                  </Text>
+                  {codeState.valid ? (
+                    <Pressable
+                      onPress={() => setField("share_with_organisation", !form.share_with_organisation)}
+                      className="mt-2 flex-row items-start gap-2"
+                    >
+                      <View
+                        className={`mt-0.5 h-4 w-4 items-center justify-center rounded border ${
+                          form.share_with_organisation ? "border-gold bg-gold" : "border-cream/40"
+                        }`}
+                      >
+                        {form.share_with_organisation ? (
+                          <Feather name="check" size={11} color={colors.navyDeep} />
+                        ) : null}
+                      </View>
+                      <Text className="flex-1 font-sans text-xs text-cream/75">
+                        I agree that my practice may be told I took part, as part of an anonymised
+                        summary. What I discuss in coaching is never shared.
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                </View>
+
                 <Field
                   label="Username"
                   placeholder="Choose a username"
@@ -607,41 +653,6 @@ export default function Register() {
                       value={form.job_title}
                       onChangeText={(v) => setField("job_title", v)}
                     />
-                    <Field
-                      label="Participation Code (Optional)"
-                      placeholder="From your doctor or organisation"
-                      value={form.participation_code}
-                      onChangeText={(v) => setField("participation_code", v.toUpperCase())}
-                      autoCapitalize="characters"
-                    />
-                    {codeState.detail ? (
-                      <Text
-                        className="-mt-2 mb-3 font-sans text-xs"
-                        style={{ color: codeState.valid ? "#7BC47F" : "#F8B4B4" }}
-                      >
-                        {codeState.detail}
-                      </Text>
-                    ) : null}
-                    {codeState.valid ? (
-                      <Pressable
-                        onPress={() => setField("share_with_organisation", !form.share_with_organisation)}
-                        className="mb-4 flex-row items-start gap-2"
-                      >
-                        <View
-                          className={`mt-0.5 h-4 w-4 items-center justify-center rounded border ${
-                            form.share_with_organisation ? "border-gold bg-gold" : "border-cream/40"
-                          }`}
-                        >
-                          {form.share_with_organisation ? (
-                            <Feather name="check" size={11} color={colors.navyDeep} />
-                          ) : null}
-                        </View>
-                        <Text className="flex-1 font-sans text-xs text-cream/75">
-                          I agree that my practice may be told I took part, as part of an anonymised
-                          summary. What I discuss in coaching is never shared.
-                        </Text>
-                      </Pressable>
-                    ) : null}
                   </>
                 )}
 
