@@ -17,6 +17,15 @@ import { colors } from "@/theme/colors";
 // and an offering picker, done once per practice at a desk. The phone carries
 // what she actually reaches for — the numbers, and sending the invitation.
 
+// A practice nominates patients, a company employees — the labels follow, as on
+// web.
+const AUDIENCE_WORDS = {
+  patients: { one: "patient", many: "patients" },
+  employees: { one: "employee", many: "employees" },
+  clients: { one: "client", many: "clients" },
+};
+const words = (audience) => AUDIENCE_WORDS[audience] || AUDIENCE_WORDS.patients;
+
 const Stat = ({ label, value, tone }) => (
   <View className="flex-1 rounded-xl border border-gold/15 bg-cream px-2 py-2.5">
     <Text className="text-center font-sans-bold text-base" style={{ color: tone || colors.navy }}>
@@ -69,7 +78,7 @@ export default function PartnerCodes() {
       const res = await api.get(`/participation-codes/${c.id}/patients/`);
       setPatients(res.data);
     } catch {
-      toast.error("Couldn't load the patient list.");
+      toast.error("Couldn't load the list of people.");
     }
   };
 
@@ -200,7 +209,8 @@ export default function PartnerCodes() {
                       textDecorationLine: c.clients_registered ? "underline" : "none",
                     }}
                   >
-                    {c.clients_registered} patient{c.clients_registered === 1 ? "" : "s"}
+                    {c.clients_registered}{" "}
+                    {c.clients_registered === 1 ? words(c.audience).one : words(c.audience).many}
                   </Text>
                 </Pressable>
                 <Text className="font-sans text-sm text-slate">max {c.max_per_client} each</Text>
@@ -292,7 +302,7 @@ export default function PartnerCodes() {
             </View>
             <Text className="mb-4 font-sans text-xs text-slate-light">
               {patients?.patients?.length || 0} registered with code {patients?.code}. Contact details
-              are yours only — the practice's report shows counts, never names.
+              are yours only — the organisation's report shows counts, never names.
             </Text>
             <ScrollView>
               {(patients?.patients || []).map((p) => (
