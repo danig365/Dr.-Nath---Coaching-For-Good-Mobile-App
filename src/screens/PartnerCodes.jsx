@@ -44,7 +44,7 @@ export default function PartnerCodes() {
       const res = await api.get("/participation-codes/");
       setCodes(Array.isArray(res.data) ? res.data : res.data.results || []);
     } catch {
-      toast.error("Couldn't load participation codes.");
+      toast.error("Couldn't load coaching codes.");
     } finally {
       setLoading(false);
     }

@@ -407,7 +407,7 @@ export default function Register() {
                     the box on the last step. */}
                 <View className="mb-4 rounded-xl border border-gold/25 bg-gold/10 p-3.5">
                   <Field
-                    label="Participation Code (Optional)"
+                    label="Coaching Code (Optional)"
                     placeholder="From your doctor or organisation"
                     value={form.participation_code}
                     onChangeText={(v) => setField("participation_code", v.toUpperCase())}

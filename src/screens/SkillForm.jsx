@@ -356,7 +356,7 @@ export default function SkillForm({ mode = "add" }) {
             </View>
             <View className="flex-1">
               <Text className="font-sans-semibold text-sm text-navy">
-                Only for patients with a participation code
+                Only for patients with a coaching code
               </Text>
               <Text className="mt-0.5 font-sans text-xs text-slate-light">
                 For partner campaigns: only clients who registered with a code from a
