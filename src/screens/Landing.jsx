@@ -277,17 +277,21 @@ export default function Landing() {
               long-lasting impact on you, your teams and others.
             </Text>
 
-            <Text className="mb-3 text-xs font-sans-semibold uppercase tracking-[2px] text-gold">
-              Offerings
-            </Text>
-            <View className="mb-8 gap-1.5">
-              {HERO_OFFERINGS.map((o) => (
-                <View key={o} className="flex-row items-center gap-2">
-                  <Text className="text-gold">•</Text>
-                  <Text className="flex-1 font-sans text-base text-hero-cream/85">{o}</Text>
-                </View>
-              ))}
-            </View>
+            {/* The list is the shortest route to the offerings section, so it
+                behaves like the link it looks like. */}
+            <Pressable onPress={() => jump("offerings")} className="mb-8">
+              <Text className="mb-3 text-xs font-sans-semibold uppercase tracking-[2px] text-gold">
+                Offerings
+              </Text>
+              <View className="gap-1.5">
+                {HERO_OFFERINGS.map((o) => (
+                  <View key={o} className="flex-row items-center gap-2">
+                    <Text className="text-gold">•</Text>
+                    <Text className="flex-1 font-sans text-base text-hero-cream/85">{o}</Text>
+                  </View>
+                ))}
+              </View>
+            </Pressable>
 
             <Button variant="gold" onPress={() => router.push("/register")} fullWidth>
               Do you have a code? Book your session →
