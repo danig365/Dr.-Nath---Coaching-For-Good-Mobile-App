@@ -293,23 +293,23 @@ export default function Landing() {
               Do you have a code? Book your session →
             </Button>
 
-            {/* The other half of the audience: no code, so the free discovery
-                call is their way in. */}
-            <Pressable
-              onPress={() => router.push("/chemistry")}
-              className="mt-3 items-center rounded-full border border-hero-cream/60 bg-hero-cream/10 py-4"
-            >
-              <Text className="font-sans-semibold text-base text-hero-cream">
-                No code? Proceed here →
-              </Text>
-            </Pressable>
-
             <Pressable
               onPress={() => jump("offerings")}
               className="mt-3 items-center rounded-full border border-hero-cream/60 bg-hero-cream/10 py-4"
             >
               <Text className="font-sans-semibold text-base text-hero-cream">
                 Explore Offerings →
+              </Text>
+            </Pressable>
+
+            {/* The other half of the audience: no code, so the free discovery
+                call is their way in — underneath the others. */}
+            <Pressable
+              onPress={() => router.push("/chemistry")}
+              className="mt-3 items-center rounded-full border border-hero-cream/60 bg-hero-cream/10 py-4"
+            >
+              <Text className="font-sans-semibold text-base text-hero-cream">
+                No code? Proceed here →
               </Text>
             </Pressable>
           </SafeAreaView>
