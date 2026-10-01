@@ -289,7 +289,7 @@ export default function Landing() {
               ))}
             </View>
 
-            <Button variant="gold" onPress={() => router.push("/chemistry")} fullWidth>
+            <Button variant="gold" onPress={() => router.push("/register")} fullWidth>
               Do you have a code? Book your session →
             </Button>
 
