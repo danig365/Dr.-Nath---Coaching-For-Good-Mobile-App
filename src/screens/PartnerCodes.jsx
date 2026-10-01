@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { View, Text, Pressable, Modal, Share, TextInput, ScrollView } from "react-native";
+import { View, Text, Pressable, Modal, Share, TextInput, ScrollView, Linking } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 
 import { api } from "@/api/client";
@@ -33,6 +33,7 @@ export default function PartnerCodes() {
   const [codes, setCodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [report, setReport] = useState(null);
+  const [patients, setPatients] = useState(null);
   const [invite, setInvite] = useState(null);
   const [sending, setSending] = useState(false);
 
@@ -59,6 +60,16 @@ export default function PartnerCodes() {
       setReport(res.data);
     } catch {
       toast.error("Couldn't load the report.");
+    }
+  };
+
+  const openPatients = async (c) => {
+    if (!c.clients_registered) return;
+    try {
+      const res = await api.get(`/participation-codes/${c.id}/patients/`);
+      setPatients(res.data);
+    } catch {
+      toast.error("Couldn't load the patient list.");
     }
   };
 
@@ -181,9 +192,17 @@ export default function PartnerCodes() {
               </View>
 
               <View className="mt-3 flex-row flex-wrap items-center gap-4">
-                <Text className="font-sans text-sm text-slate">
-                  {c.clients_registered} patient{c.clients_registered === 1 ? "" : "s"}
-                </Text>
+                <Pressable onPress={() => openPatients(c)} disabled={!c.clients_registered}>
+                  <Text
+                    className="font-sans text-sm"
+                    style={{
+                      color: c.clients_registered ? colors.goldDeep : colors.slate,
+                      textDecorationLine: c.clients_registered ? "underline" : "none",
+                    }}
+                  >
+                    {c.clients_registered} patient{c.clients_registered === 1 ? "" : "s"}
+                  </Text>
+                </Pressable>
                 <Text className="font-sans text-sm text-slate">max {c.max_per_client} each</Text>
                 <Text className="font-sans-semibold text-sm text-navy">
                   {used} of {c.total_sessions} used
@@ -253,6 +272,54 @@ export default function PartnerCodes() {
             <Text className="mt-2 text-center font-sans text-[11px] text-slate-light">
               Sent from dr-nath.com. Replies come to your enquiries inbox.
             </Text>
+          </View>
+        </ModalBackdrop>
+      </Modal>
+
+      <Modal
+        visible={!!patients}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPatients(null)}
+      >
+        <ModalBackdrop>
+          <View className="max-h-[85%] w-full max-w-md rounded-2xl bg-white p-5">
+            <View className="mb-1 flex-row items-start justify-between">
+              <Text className="flex-1 font-display text-2xl text-navy">{patients?.organisation}</Text>
+              <Pressable onPress={() => setPatients(null)} hitSlop={8}>
+                <Feather name="x" size={20} color={colors.slateLight} />
+              </Pressable>
+            </View>
+            <Text className="mb-4 font-sans text-xs text-slate-light">
+              {patients?.patients?.length || 0} registered with code {patients?.code}. Contact details
+              are yours only — the practice's report shows counts, never names.
+            </Text>
+            <ScrollView>
+              {(patients?.patients || []).map((p) => (
+                <View key={p.id} className="mb-2 rounded-xl border border-gold/15 bg-cream px-3.5 py-3">
+                  <View className="flex-row items-center justify-between gap-2">
+                    <Text className="flex-1 font-sans-semibold text-navy" numberOfLines={1}>
+                      {p.name}
+                    </Text>
+                    <Text className="font-sans-bold text-xs text-navy">
+                      {p.sessions_booked}/{patients?.max_per_client || "—"}
+                    </Text>
+                  </View>
+                  <Pressable onPress={() => Linking.openURL(`mailto:${p.email}`)}>
+                    <Text className="mt-1 font-sans text-xs text-gold-deep" numberOfLines={1}>
+                      {p.email}
+                    </Text>
+                  </Pressable>
+                  {p.phone ? (
+                    <Pressable onPress={() => Linking.openURL(`tel:${p.phone}`)}>
+                      <Text className="mt-0.5 font-sans text-xs text-gold-deep">{p.phone}</Text>
+                    </Pressable>
+                  ) : (
+                    <Text className="mt-0.5 font-sans text-xs text-slate-light">No phone given</Text>
+                  )}
+                </View>
+              ))}
+            </ScrollView>
           </View>
         </ModalBackdrop>
       </Modal>

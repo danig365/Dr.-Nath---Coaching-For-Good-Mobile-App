@@ -163,6 +163,7 @@ export default function Register() {
     industries: [],
     organisation: "",
     job_title: "",
+    phone: "",
     participation_code: "",
     share_with_organisation: false,
   });
@@ -592,6 +593,13 @@ export default function Register() {
                       placeholder="Your company or organisation"
                       value={form.organisation}
                       onChangeText={(v) => setField("organisation", v)}
+                    />
+                    <Field
+                      label="Phone (Optional)"
+                      placeholder="+27 83 123 4567"
+                      value={form.phone}
+                      onChangeText={(v) => setField("phone", v)}
+                      keyboardType="phone-pad"
                     />
                     <Field
                       label="Job Title"

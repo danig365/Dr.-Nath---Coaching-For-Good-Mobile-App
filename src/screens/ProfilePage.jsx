@@ -100,6 +100,7 @@ export default function ProfilePage() {
         is_verified: d.profile.is_verified,
         organisation: d.profile.organisation,
         job_title: d.profile.job_title,
+        phone: d.profile.phone || "",
         coaching_goals: d.profile.coaching_goals || [],
       };
       setProfile(p);
@@ -113,6 +114,7 @@ export default function ProfilePage() {
         years_experience: p.years_experience ?? "",
         organisation: p.organisation || "",
         job_title: p.job_title || "",
+        phone: p.phone || "",
         // Arrays are edited as comma-separated text; joined here, split on save.
         specialties: (p.specialties || []).join(", "),
         certifications: (p.certifications || []).join(", "),
@@ -147,6 +149,7 @@ export default function ProfilePage() {
         linkedin_url: formData.linkedin_url,
         organisation: formData.organisation,
         job_title: formData.job_title,
+        phone: formData.phone,
         specialties: toList(formData.specialties),
         certifications: toList(formData.certifications),
         industries: toList(formData.industries),
@@ -179,6 +182,7 @@ export default function ProfilePage() {
         years_experience: rp.years_experience,
         organisation: rp.organisation,
         job_title: rp.job_title,
+        phone: rp.phone || "",
         specialties: rp.specialties || [],
         certifications: rp.certifications || [],
         industries: rp.industries || [],
@@ -373,6 +377,13 @@ export default function ProfilePage() {
                 label="Job title"
                 value={formData.job_title}
                 onChangeText={(v) => set("job_title", v)}
+              />
+              <Input
+                label="Phone"
+                value={formData.phone}
+                onChangeText={(v) => set("phone", v)}
+                keyboardType="phone-pad"
+                hint="So your coach can reach you if a session won't connect."
               />
               <Input
                 label="Coaching goals"
