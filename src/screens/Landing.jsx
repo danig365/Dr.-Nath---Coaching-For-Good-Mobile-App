@@ -61,27 +61,6 @@ const OFFERINGS = [
   },
 ];
 
-const STEPS = [
-  {
-    num: "01",
-    icon: "book-open",
-    title: "Discover Your Goals",
-    desc: "We start by exploring your vision, your values and what you would like to move forward.",
-  },
-  {
-    num: "02",
-    icon: "calendar",
-    title: "Book Your Sessions",
-    desc: "Schedule focused 1-on-1 coaching sessions.",
-  },
-  {
-    num: "03",
-    icon: "bar-chart-2",
-    title: "Grow & Track Impact",
-    desc: "Apply tailored frameworks, track real progress and become who you're meant to be.",
-  },
-];
-
 // Mirrors the footer columns in frontend/src/pages/Home.jsx. "Explore" points at
 // on-page anchors on the web (/#who, /#newsletter), so here those entries scroll
 // this ScrollView instead of navigating.
@@ -399,29 +378,6 @@ export default function Landing() {
                 <Button variant="gold" size="sm" onPress={() => router.push(joinHref)}>
                   Book a Session →
                 </Button>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* ── HOW COACHING WORKS ── */}
-        <View className="bg-cream px-6 py-14">
-          <Text className="mb-4 text-center text-xs font-sans-semibold uppercase tracking-[2px] text-gold-deep">
-            The Process
-          </Text>
-          <Text className="mb-10 text-center font-display text-4xl leading-tight text-navy">
-            How coaching works
-          </Text>
-
-          <View className="gap-8">
-            {STEPS.map((s) => (
-              <View key={s.num}>
-                <Text className="font-display text-5xl text-gold/35">{s.num}</Text>
-                <View className="mb-3 mt-4">
-                  <Feather name={s.icon} size={32} color={colors.goldDeep} />
-                </View>
-                <Text className="mb-3 font-display text-2xl text-navy">{s.title}</Text>
-                <Text className="font-sans text-base leading-7 text-slate">{s.desc}</Text>
               </View>
             ))}
           </View>
