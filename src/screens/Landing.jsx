@@ -290,7 +290,7 @@ export default function Landing() {
             </View>
 
             <Button variant="gold" onPress={() => router.push("/chemistry")} fullWidth>
-              Book a Free Chemistry Session →
+              Do you have a code? Book your session →
             </Button>
 
             <Pressable
